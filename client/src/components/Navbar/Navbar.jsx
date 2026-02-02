@@ -1,39 +1,86 @@
-import { FaInstagram, FaFacebookF, FaShoppingCart, FaBars } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import {
+  FaInstagram,
+  FaFacebookF,
+  FaShoppingCart,
+  FaBars,
+} from "react-icons/fa";
+import { NavLink } from "react-router-dom"; 
 import { useState } from "react";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="w-full shadow-md">
-      {/* TOP BAR */}
-      <div className="bg-caviro text-white text-sm">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-2">
-          <span>📞 +91 9539691757 | Shipping all over India</span>
-          <div className="flex gap-4">
-            <a href="#" className="hover:opacity-80"><FaInstagram /></a>
-            <a href="#" className="hover:opacity-80"><FaFacebookF /></a>
-          </div>
+    <header className="w-full sticky top-0 z-50 bg-white shadow-sm">
+      {/* 🔹 MOVING TOP BAR */}
+      <div className="bg-caviro text-white overflow-hidden">
+        <div className="flex items-center gap-10 whitespace-nowrap px-6 py-2 text-sm animate-[marquee_22s_linear_infinite] hover:[animation-play-state:paused]">
+          <span>📞 +91 9539691757</span>
+          <span>🚚 Shipping all over India</span>
+          <span className="flex items-center gap-2">
+            <FaInstagram /> Instagram
+          </span>
+          <span className="flex items-center gap-2">
+            <FaFacebookF /> Facebook
+          </span>
         </div>
       </div>
 
-      {/* MAIN NAVBAR */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
-          
+      {/* 🔹 MAIN NAVBAR */}
+      <div className="border-b">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
           {/* LOGO */}
-          <Link to="/" className="text-2xl font-bold text-caviro whitespace-nowrap">
+          <NavLink
+            to="/"
+            className="text-2xl font-extrabold tracking-wide text-caviro"
+          >
             Wear Caviro
-          </Link>
+          </NavLink>
 
           {/* DESKTOP MENU */}
           <nav className="hidden md:flex items-center gap-8 font-medium">
-            <Link to="/" className="hover:text-caviro">Home</Link>
-            <Link to="/about" className="hover:text-caviro">About</Link>
-            <Link to="/contact" className="hover:text-caviro">Contact</Link>
+           
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `nav-link transition ${
+                  isActive
+                    ? "text-caviro"
+                    : "text-gray-700 hover:text-caviro"
+                }`
+              }
+            >
+              Home
+            </NavLink>
 
-            <select className="border border-gray-300 rounded px-2 py-1">
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                `nav-link transition ${
+                  isActive
+                    ? "text-caviro"
+                    : "text-gray-700 hover:text-caviro"
+                }`
+              }
+            >
+              About
+            </NavLink>
+
+            <NavLink
+              to="/contact"
+              className={({ isActive }) =>
+                `nav-link transition ${
+                  isActive
+                    ? "text-caviro"
+                    : "text-gray-700 hover:text-caviro"
+                }`
+              }
+            >
+              Contact
+            </NavLink>
+
+            {/* BRANDS */}
+            <select className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:border-caviro">
               <option>Brands</option>
               <option>Nike</option>
               <option>Adidas</option>
@@ -44,12 +91,23 @@ export default function Navbar() {
               <option>Loafer</option>
             </select>
 
-            <Link to="/cart" className="flex items-center gap-1 hover:text-caviro">
-              <FaShoppingCart /> Cart
-            </Link>
+            {/* CART */}
+            <NavLink
+              to="/cart"
+              className={({ isActive }) =>
+                `nav-link flex items-center gap-2 transition ${
+                  isActive
+                    ? "text-caviro"
+                    : "text-gray-700 hover:text-caviro"
+                }`
+              }
+            >
+              <FaShoppingCart />
+              Cart
+            </NavLink>
           </nav>
 
-          {/* MOBILE BUTTON */}
+          {/* MOBILE MENU BUTTON */}
           <button
             className="md:hidden text-2xl text-caviro"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -58,14 +116,57 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* MOBILE MENU */}
+        {/* 🔹 MOBILE MENU */}
         {mobileOpen && (
-          <div className="md:hidden bg-white border-t">
+          <div className="md:hidden border-t bg-white">
             <nav className="flex flex-col px-6 py-4 gap-4 font-medium">
-              <Link to="/" onClick={() => setMobileOpen(false)}>Home</Link>
-              <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
-              <Link to="/contact" onClick={() => setMobileOpen(false)}>Contact</Link>
-              <Link to="/cart" onClick={() => setMobileOpen(false)}>Cart</Link>
+              <NavLink
+                to="/"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${
+                    isActive ? "text-caviro" : "text-gray-700"
+                  }`
+                }
+              >
+                Home
+              </NavLink>
+
+              <NavLink
+                to="/about"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${
+                    isActive ? "text-caviro" : "text-gray-700"
+                  }`
+                }
+              >
+                About
+              </NavLink>
+
+              <NavLink
+                to="/contact"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${
+                    isActive ? "text-caviro" : "text-gray-700"
+                  }`
+                }
+              >
+                Contact
+              </NavLink>
+
+              <NavLink
+                to="/cart"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${
+                    isActive ? "text-caviro" : "text-gray-700"
+                  }`
+                }
+              >
+                Cart
+              </NavLink>
             </nav>
           </div>
         )}

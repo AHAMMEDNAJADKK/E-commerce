@@ -39,7 +39,8 @@ export default function Cart() {
                 />
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="text-red-600"
+                 className="text-red-600 hover:underline"
+
                 >
                   Remove
                 </button>

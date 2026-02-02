@@ -1,6 +1,7 @@
 export default function Contact() {
   return (
-    <div className="px-6 md:px-16 py-10 max-w-3xl mx-auto">
+    <div className="w-full border rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-caviro"
+>
       <h1 className="text-3xl font-bold text-caviro mb-6">Contact Us</h1>
 
       <p className="mb-6 text-gray-600">
