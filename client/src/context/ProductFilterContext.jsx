@@ -3,28 +3,35 @@ import { createContext, useContext, useState } from "react";
 const ProductFilterContext = createContext();
 
 export function ProductFilterProvider({ children }) {
-  const [qualityFilter, setQualityFilter] = useState("ALL");
   const [brandFilter, setBrandFilter] = useState("ALL");
+  const [qualityFilter, setQualityFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
 
   const filterProducts = (products) => {
-    return products.filter((product) => {
-      const qualityMatch =
-        qualityFilter === "ALL" || product.quality === qualityFilter;
+    return products.filter((p) => {
+      const matchBrand =
+        brandFilter === "ALL" || p.brand === brandFilter;
 
-      const brandMatch =
-        brandFilter === "ALL" || product.brand === brandFilter;
+      const matchQuality =
+        qualityFilter === "ALL" || p.quality === qualityFilter;
 
-      return qualityMatch && brandMatch;
+      const matchSearch = p.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      return matchBrand && matchQuality && matchSearch;
     });
   };
 
   return (
     <ProductFilterContext.Provider
       value={{
-        qualityFilter,
-        setQualityFilter,
         brandFilter,
         setBrandFilter,
+        qualityFilter,
+        setQualityFilter,
+        search,
+        setSearch,
         filterProducts,
       }}
     >
@@ -33,4 +40,5 @@ export function ProductFilterProvider({ children }) {
   );
 }
 
-export const useProductFilter = () => useContext(ProductFilterContext);
+export const useProductFilter = () =>
+  useContext(ProductFilterContext);

@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import SectionTitle from "../components/SectionTitle";
 import ProductCard from "../components/ProductCard";
 import { useProductFilter } from "../context/ProductFilterContext";
 
+/* 🔹 STATIC PRODUCTS (UNCHANGED) */
 const newArrivals = [
   {
     id: 1,
@@ -66,6 +68,16 @@ export default function Home() {
   const { qualityFilter, setQualityFilter, filterProducts } =
     useProductFilter();
 
+  /* 🔹 ADMIN PRODUCTS STATE */
+  const [adminProducts, setAdminProducts] = useState([]);
+
+  /* 🔹 LOAD ADMIN PRODUCTS FROM LOCAL STORAGE */
+  useEffect(() => {
+    const storedProducts =
+      JSON.parse(localStorage.getItem("adminProducts")) || [];
+    setAdminProducts(storedProducts);
+  }, []);
+
   return (
     <div className="px-6 md:px-16 py-10">
       {/* 🔥 HERO SECTION */}
@@ -74,8 +86,8 @@ export default function Home() {
           Wear Caviro Sneakers
         </h1>
         <p className="text-lg mb-6 opacity-90">
-          Premium 10A & budget-friendly 7A sneakers – shipped all over
-          India 🇮🇳
+          Premium 10A & budget-friendly 7A sneakers – shipped all
+          over India 🇮🇳
         </p>
         <button className="bg-white text-caviro px-8 py-3 rounded-full font-semibold hover:scale-105 transition">
           Shop Now
@@ -88,12 +100,11 @@ export default function Home() {
           <button
             key={q}
             onClick={() => setQualityFilter(q)}
-            className={`px-6 py-2 rounded-full border font-medium transition
-              ${
-                qualityFilter === q
-                  ? "bg-caviro text-white"
-                  : "border-caviro text-caviro hover:bg-caviro hover:text-white"
-              }`}
+            className={`px-6 py-2 rounded-full border font-medium transition ${
+              qualityFilter === q
+                ? "bg-caviro text-white"
+                : "border-caviro text-caviro hover:bg-caviro hover:text-white"
+            }`}
           >
             {q === "ALL" ? "All Products" : `${q} Quality`}
           </button>
@@ -121,6 +132,22 @@ export default function Home() {
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+
+      {/* ⭐ ADMIN ADDED PRODUCTS */}
+      {adminProducts.length > 0 && (
+        <>
+          <SectionTitle
+            title="Latest Admin Products"
+            subtitle="Freshly added to the store"
+          />
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 mb-20">
+            {filterProducts(adminProducts).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* ⭐ EXCLUSIVE */}
       <SectionTitle
