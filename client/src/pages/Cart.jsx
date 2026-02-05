@@ -1,5 +1,6 @@
 import { useCart } from "../context/CartContext";
-import { loadRazorpay } from "../utils/razorpay";
+import loadRazorpay from "../utils/razorpay";
+
 
 export default function Cart() {
   const { cartItems, removeFromCart, updateQty } = useCart();
