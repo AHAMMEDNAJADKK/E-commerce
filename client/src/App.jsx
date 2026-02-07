@@ -7,8 +7,9 @@ import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 
-import AdminAddProduct from "./admin/AdminAddProduct.jsx";
 import AdminDashboard from "./admin/AdminDashboard";
+import AdminAddProduct from "./admin/AdminAddProduct.jsx";
+import AdminOrders from "./admin/AdminOrders";
 import AdminLogin from "./admin/AdminLogin.jsx";
 
 import Login from "./pages/Login";
@@ -76,9 +77,19 @@ export default function App() {
           }
         />
 
-        {/* 👑 ADMIN ONLY */}
+        {/* 👑 ADMIN DASHBOARD */}
         <Route
           path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+        {/* ➕ ADMIN ADD PRODUCT */}
+        <Route
+          path="/admin/add-product"
           element={
             <AdminRoute>
               <AdminAddProduct />
@@ -86,6 +97,17 @@ export default function App() {
           }
         />
 
+        {/* 📦 ADMIN ORDERS */}
+        <Route
+          path="/admin-orders"
+          element={
+            <AdminRoute>
+              <AdminOrders />
+            </AdminRoute>
+          }
+        />
+
+        {/* 🔐 ADMIN LOGIN (OPTIONAL) */}
         <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* ❌ FALLBACK */}

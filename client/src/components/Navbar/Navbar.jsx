@@ -15,11 +15,8 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const isAdmin = user?.role === "admin";
 
-  const {
-    brandFilter,
-    setBrandFilter,
-    setSearch,
-  } = useProductFilter();
+  const { brandFilter, setBrandFilter, setSearch } =
+    useProductFilter();
 
   const brands = [
     "ALL",
@@ -33,7 +30,7 @@ export default function Navbar() {
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white shadow-sm">
-      {/* 🔹 TOP BAR (HIDE FOR ADMIN) */}
+      {/* 🔹 TOP BAR (USER ONLY) */}
       {!isAdmin && (
         <div className="bg-caviro text-white overflow-hidden">
           <div className="flex items-center gap-10 whitespace-nowrap px-6 py-2 text-sm animate-[marquee_22s_linear_infinite]">
@@ -60,21 +57,23 @@ export default function Navbar() {
             Wear Caviro
           </NavLink>
 
-          {/* DESKTOP MENU */}
+          {/* 🔹 DESKTOP MENU */}
           <nav className="hidden md:flex items-center gap-6 font-medium">
-            {/* 🛠 ADMIN NAVBAR */}
             {isAdmin ? (
               <>
                 <NavLink to="/admin" className="nav-link">
                   Dashboard
                 </NavLink>
 
-                <NavLink to="/admin-orders" className="nav-link">
+                <NavLink
+                  to="/admin-orders"
+                  className="nav-link"
+                >
                   Orders
                 </NavLink>
 
                 <NavLink
-                  to="/admin"
+                  to="/admin/add-product"
                   className="bg-caviro text-white px-5 py-2 rounded-full text-sm font-semibold"
                 >
                   + Add Product
@@ -89,7 +88,6 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                {/* 👤 USER / GUEST NAVBAR */}
                 <NavLink to="/" className="nav-link">
                   Home
                 </NavLink>
@@ -98,19 +96,22 @@ export default function Navbar() {
                   About
                 </NavLink>
 
-                <NavLink to="/contact" className="nav-link">
+                <NavLink
+                  to="/contact"
+                  className="nav-link"
+                >
                   Contact
                 </NavLink>
 
-                {/* 🔍 SEARCH */}
                 <input
                   type="text"
                   placeholder="Search sneakers..."
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                   className="border rounded-full px-4 py-1.5 text-sm"
                 />
 
-                {/* 🔹 BRAND FILTER */}
                 <select
                   value={brandFilter}
                   onChange={(e) =>
@@ -128,7 +129,10 @@ export default function Navbar() {
                 </select>
 
                 {user?.role === "user" && (
-                  <NavLink to="/orders" className="nav-link">
+                  <NavLink
+                    to="/orders"
+                    className="nav-link"
+                  >
                     Orders
                   </NavLink>
                 )}
@@ -143,7 +147,9 @@ export default function Navbar() {
 
                 {!user ? (
                   <>
-                    <NavLink to="/login">Login</NavLink>
+                    <NavLink to="/login">
+                      Login
+                    </NavLink>
                     <NavLink to="/register">
                       Register
                     </NavLink>
@@ -160,7 +166,7 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* MOBILE BUTTON */}
+          {/* 🔹 MOBILE MENU BUTTON */}
           <button
             className="md:hidden text-2xl text-caviro"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -168,6 +174,56 @@ export default function Navbar() {
             <FaBars />
           </button>
         </div>
+
+        {/* 🔹 MOBILE MENU */}
+        {mobileOpen && (
+          <div className="md:hidden border-t px-6 py-4 space-y-4">
+            {isAdmin ? (
+              <>
+                <NavLink to="/admin">Dashboard</NavLink>
+                <NavLink to="/admin-orders">
+                  Orders
+                </NavLink>
+                <NavLink to="/admin/add-product">
+                  Add Product
+                </NavLink>
+                <button
+                  onClick={logout}
+                  className="text-red-600"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/">Home</NavLink>
+                <NavLink to="/about">About</NavLink>
+                <NavLink to="/contact">
+                  Contact
+                </NavLink>
+                <NavLink to="/cart">Cart</NavLink>
+
+                {!user ? (
+                  <>
+                    <NavLink to="/login">
+                      Login
+                    </NavLink>
+                    <NavLink to="/register">
+                      Register
+                    </NavLink>
+                  </>
+                ) : (
+                  <button
+                    onClick={logout}
+                    className="text-red-600"
+                  >
+                    Logout
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

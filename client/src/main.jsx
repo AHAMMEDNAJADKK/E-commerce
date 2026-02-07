@@ -9,14 +9,14 @@ import { AuthProvider } from "./context/AuthContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <CartProvider>
-        <ProductFilterProvider>
-          <AuthProvider>
+    <CartProvider>
+      <ProductFilterProvider>
+        <AuthProvider>
+          <BrowserRouter>
             <App />
-          </AuthProvider>
-        </ProductFilterProvider>
-      </CartProvider>
-    </BrowserRouter>
+          </BrowserRouter>
+        </AuthProvider>
+      </ProductFilterProvider>
+    </CartProvider>
   </React.StrictMode>,
 );
