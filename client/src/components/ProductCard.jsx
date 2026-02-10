@@ -1,15 +1,33 @@
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAddToCart = () => {
+    if (!user) {
+      alert("Please login or register to add products to cart");
+      navigate("/login");
+      return;
+    }
+
+    addToCart(product);
+    alert("Product added to cart successfully 🛒");
+    navigate("/cart");
+  };
 
   return (
     <div className="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
+
       {/* IMAGE */}
       <div className="relative">
         <img
-          src={product.image}
+          src={product.images?.[0]}
           className="h-48 w-full object-cover rounded"
+          alt={product.name}
         />
 
         {/* QUALITY BADGE */}
@@ -32,8 +50,9 @@ export default function ProductCard({ product }) {
         <span className="font-bold text-caviro">
           ₹{product.price}
         </span>
+
         <button
-          onClick={() => addToCart(product)}
+          onClick={handleAddToCart}
           className="bg-caviro text-white px-4 py-1.5 rounded hover:opacity-90 transition"
         >
           Add to Cart
