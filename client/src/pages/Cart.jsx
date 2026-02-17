@@ -19,7 +19,7 @@ export default function Cart() {
     await loadRazorpay();
 
     const options = {
-      key: "rzp_test_123456",
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: total * 100,
       currency: "INR",
       name: "Wear Caviro",

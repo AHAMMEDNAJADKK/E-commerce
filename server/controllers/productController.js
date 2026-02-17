@@ -20,7 +20,7 @@ export const createProduct = async (req, res) => {
       brand,
       price,
       description,
-      image,
+      image:req.file ? `uploads/${req.file.filename}` : "",
       size
     });
 

@@ -1,35 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { FaBoxOpen, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
-import { useProducts } from "../context/ProductContext";
-
-/* ---------- BASE64 CONVERTER ---------- */
-const toBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-  });
 
 export default function AdminAddProduct() {
-  const { products, addProduct, deleteProduct } = useProducts();
-
-  const [editId, setEditId] = useState(null);
+  const [products, setProducts] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [image, setImage] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
     brand: "",
     price: "",
     quality: "10A",
-    images: [],
     description: "",
     size: "",
     isNewArrival: false,
     isTrending: false,
   });
 
-  /* ---------- INPUT HANDLER ---------- */
+  /* ---------------- FETCH PRODUCTS ---------------- */
+  const fetchProducts = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:5000/api/products"
+      );
+      setProducts(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  /* ---------------- HANDLE INPUT ---------------- */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
@@ -38,63 +43,71 @@ export default function AdminAddProduct() {
     }));
   };
 
-  /* ---------- IMAGE HANDLER ---------- */
-  const handleImageChange = async (e) => {
-    const files = Array.from(e.target.files);
-
-    const base64Images = await Promise.all(
-      files.map((file) => toBase64(file))
-    );
-
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, ...base64Images],
-    }));
-  };
-
-  /* ---------- SUBMIT ---------- */
-  const handleSubmit = (e) => {
+  /* ---------------- HANDLE SUBMIT ---------------- */
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (editId) {
-      deleteProduct(editId);
+    const formData = new FormData();
+
+    formData.append("name", form.name);
+    formData.append("brand", form.brand);
+    formData.append("price", form.price);
+    formData.append("description", form.description);
+    formData.append("size", form.size);
+    formData.append("quality", form.quality);
+    formData.append("isNewArrival", form.isNewArrival);
+    formData.append("isTrending", form.isTrending);
+    formData.append("image", image);
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/products",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
+
+      setForm({
+        name: "",
+        brand: "",
+        price: "",
+        quality: "10A",
+        description: "",
+        size: "",
+        isNewArrival: false,
+        isTrending: false,
+      });
+
+      setImage(null);
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+      alert("Error adding product");
     }
-
-    addProduct({
-      id: editId || Date.now(),
-      ...form,
-      price: Number(form.price),
-    });
-
-    setForm({
-      name: "",
-      brand: "",
-      price: "",
-      quality: "10A",
-      images: [],
-      description: "",
-      size: "",
-      isNewArrival: false,
-      isTrending: false,
-    });
-
-    setEditId(null);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
   };
 
-  /* ---------- EDIT ---------- */
-  const handleEdit = (product) => {
-    setForm(product);
-    setEditId(product.id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  /* ---------------- DELETE PRODUCT ---------------- */
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/products/${id}`
+      );
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  /* ---------- UI ---------- */
+  /* ---------------- UI ---------------- */
   return (
     <div className="min-h-screen bg-gray-50 px-6 md:px-20 py-14">
 
-      {/* TOAST */}
       {showToast && (
         <div className="fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2 shadow">
           <FaCheckCircle /> Product saved successfully
@@ -105,11 +118,9 @@ export default function AdminAddProduct() {
         Admin Dashboard
       </h1>
 
-      {/* ADD / EDIT FORM */}
       <div className="max-w-2xl bg-white shadow-xl rounded-2xl p-10 mb-16">
         <h2 className="text-2xl font-semibold mb-8 flex items-center gap-2">
-          <FaBoxOpen />
-          {editId ? "Edit Product" : "Add New Product"}
+          <FaBoxOpen /> Add New Product
         </h2>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -142,16 +153,6 @@ export default function AdminAddProduct() {
             required
           />
 
-          <select
-            name="quality"
-            value={form.quality}
-            onChange={handleChange}
-            className="admin-input-simple"
-          >
-            <option value="10A">Premium (10A)</option>
-            <option value="7A">Budget (7A)</option>
-          </select>
-
           <textarea
             name="description"
             placeholder="Product description"
@@ -163,13 +164,12 @@ export default function AdminAddProduct() {
 
           <input
             name="size"
-            placeholder="Available sizes (eg: S, M, L or 7,8,9)"
+            placeholder="Available sizes"
             value={form.size}
             onChange={handleChange}
             className="admin-input-simple"
           />
 
-          {/* FLAGS */}
           <div className="flex gap-6">
             <label className="flex gap-2 items-center">
               <input
@@ -192,33 +192,19 @@ export default function AdminAddProduct() {
             </label>
           </div>
 
-          {/* IMAGE UPLOAD */}
+          {/* IMAGE INPUT */}
           <label className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-caviro">
-            Upload Images
+            Upload Image
             <input
               type="file"
-              multiple
               accept="image/*"
               hidden
-              onChange={handleImageChange}
+              onChange={(e) => setImage(e.target.files[0])}
             />
           </label>
 
-          {/* IMAGE PREVIEW */}
-          {form.images.length > 0 && (
-            <div className="grid grid-cols-3 gap-3">
-              {form.images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  className="h-28 w-full object-cover rounded"
-                />
-              ))}
-            </div>
-          )}
-
           <button className="admin-submit-btn w-full">
-            {editId ? "Update Product" : "Add Product"}
+            Add Product
           </button>
         </form>
       </div>
@@ -226,15 +212,15 @@ export default function AdminAddProduct() {
       {/* PRODUCT LIST */}
       <div className="grid md:grid-cols-3 gap-6">
         {products.map((p) => (
-          <div key={p.id} className="bg-white rounded-xl shadow p-4">
+          <div key={p._id} className="bg-white rounded-xl shadow p-4">
             <img
-              src={p.images?.[0]}
+              src={`http://localhost:5000/${p.image}`}
               className="h-40 w-full object-cover rounded"
+              alt={p.name}
             />
 
             <h3 className="font-semibold mt-2">{p.name}</h3>
             <p className="text-sm text-gray-500">{p.brand}</p>
-
             <p className="text-xs mt-1 text-gray-600">
               Size: {p.size}
             </p>
@@ -244,21 +230,12 @@ export default function AdminAddProduct() {
               {p.isTrending && "🔥 Trending"}
             </div>
 
-            <div className="flex justify-between mt-3">
-              <button
-                onClick={() => handleEdit(p)}
-                className="text-blue-600 flex gap-1 items-center"
-              >
-                <FaEdit /> Edit
-              </button>
-
-              <button
-                onClick={() => deleteProduct(p.id)}
-                className="text-red-600 flex gap-1 items-center"
-              >
-                <FaTrash /> Delete
-              </button>
-            </div>
+            <button
+              onClick={() => handleDelete(p._id)}
+              className="text-red-600 flex gap-1 items-center mt-3"
+            >
+              <FaTrash /> Delete
+            </button>
           </div>
         ))}
       </div>

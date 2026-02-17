@@ -24,11 +24,10 @@ export default function ProductCard({ product }) {
 
       {/* IMAGE */}
       <div className="relative">
-        <img
-          src={product.images?.[0]}
-          className="h-48 w-full object-cover rounded"
-          alt={product.name}
-        />
+      <img
+  src={`http://localhost:5000/${product.image}`}
+  alt={product.name}
+/>
 
         {/* QUALITY BADGE */}
         <span

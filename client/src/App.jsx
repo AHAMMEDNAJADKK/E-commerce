@@ -14,9 +14,11 @@ import AdminLogin from "./admin/AdminLogin.jsx";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
+import CheckoutPage from "./pages/CheckoutPage.jsx";
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import Footer from "./components/Footer/Footer";
 import { useAuth } from "./context/AuthContext";
+import OrderPage from "./pages/OrderPage.jsx";
 
 /* 🔒 ADMIN ROUTE */
 const AdminRoute = ({ children }) => {
@@ -76,6 +78,10 @@ export default function App() {
             </UserRoute>
           }
         />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/order/:id" element={<OrderPage />} />
+
 
         {/* 👑 ADMIN DASHBOARD */}
         <Route
