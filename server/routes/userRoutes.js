@@ -1,17 +1,20 @@
 import express from "express";
 import {
   getUserProfile,
-  updateUserProfile,
-  getUsers
+  getAllUsers,
+  deleteUser,
 } from "../controllers/userController.js";
+
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/profile")
-  .get(protect, getUserProfile)
-  .put(protect, updateUserProfile);
+// 🔐 Logged-in user profile
+router.get("/profile", protect, getUserProfile);
 
-router.get("/", protect, adminOnly, getUsers);
+// 🔐 Admin routes
+router.get("/", protect, adminOnly, getAllUsers);
+router.delete("/:id", protect, adminOnly, deleteUser);
 
 export default router;
+

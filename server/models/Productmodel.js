@@ -4,28 +4,34 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     brand: {
       type: String,
-      required: true
     },
     price: {
       type: Number,
-      required: true
+      required: true,
     },
     description: {
       type: String,
-      required: true
+    },
+    quality: {
+      type: String,
+      enum: ["10A", "7A"],
+      required: true,
     },
     image: {
-      type: [String],
-      required: true
+      type: String,
     },
-    size: {
-      type: [String],   // multiple sizes like ["S", "M", "L"]
-      required: true
-    }
+    isNewArrival: {
+      type: Boolean,
+      default: false,
+    },
+    isTrending: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

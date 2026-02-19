@@ -1,35 +1,27 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 const ProductContext = createContext();
 
-export const useProducts = () => useContext(ProductContext);
-
 export const ProductProvider = ({ children }) => {
+  const [products, setProducts] = useState([]);
 
-  // ✅ Load once from localStorage
-  const [products, setProducts] = useState(() => {
-    const stored = localStorage.getItem("products");
-    return stored ? JSON.parse(stored) : [];
-  });
+  const fetchProducts = async () => {
+    const { data } = await axios.get("/api/products");
+    setProducts(data);
+  };
 
-  // ✅ Always sync to localStorage
   useEffect(() => {
-    localStorage.setItem("products", JSON.stringify(products));
-  }, [products]);
-
-  // ✅ SAFE add
-  const addProduct = (product) => {
-    setProducts(prev => [...prev, product]);
-  };
-
-  // ✅ SAFE delete
-  const deleteProduct = (id) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-  };
+    fetchProducts();
+  }, []);
 
   return (
-    <ProductContext.Provider value={{ products, addProduct, deleteProduct }}>
+    <ProductContext.Provider
+      value={{ products, setProducts, fetchProducts }}
+    >
       {children}
     </ProductContext.Provider>
   );
 };
+
+export const useProducts = () => useContext(ProductContext);

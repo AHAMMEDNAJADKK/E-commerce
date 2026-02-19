@@ -1,13 +1,14 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// PROTECT ROUTE (Logged-in users only)
+// 🔐 Protect Routes
 export const protect = async (req, res, next) => {
   let token;
 
-  if (req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")) {
-    
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
       token = req.headers.authorization.split(" ")[1];
 
@@ -16,7 +17,6 @@ export const protect = async (req, res, next) => {
       req.user = await User.findById(decoded.id).select("-password");
 
       next();
-
     } catch (error) {
       res.status(401).json({ message: "Not authorized, token failed" });
     }
@@ -27,7 +27,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// ADMIN ONLY
+// 🔐 Admin Only
 export const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();

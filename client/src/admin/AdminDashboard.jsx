@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
+    // 🔐 Protect dashboard
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (!userInfo || !userInfo.token) {
+      navigate("/login");
+      return;
+    }
+
     const savedOrders =
       JSON.parse(localStorage.getItem("orders")) || [];
+
     setOrders(savedOrders);
-  }, []);
+  }, [navigate]);
 
   /* 📦 METRICS */
   const totalOrders = orders.length;
@@ -18,12 +28,17 @@ export default function AdminDashboard() {
   );
 
   const customers = [
-    ...new Set(orders.map((o) => o.userEmail)),
+    ...new Set(
+      orders
+        .filter((o) => o.userEmail)
+        .map((o) => o.userEmail)
+    ),
   ];
 
   /* 👤 TOP CUSTOMERS */
   const customerStats = {};
   orders.forEach((o) => {
+    if (!o.userEmail) return;
     customerStats[o.userEmail] =
       (customerStats[o.userEmail] || 0) + 1;
   });
@@ -32,42 +47,45 @@ export default function AdminDashboard() {
     (a, b) => b[1] - a[1]
   );
 
-  /* 📅 ORDERS PER DAY */
+  /* 📅 ORDERS PER DAY (SAFE DATE FIX) */
   const ordersByDate = {};
   orders.forEach((o) => {
-    const date = new Date(o.createdAt)
-      .toISOString()
-      .slice(0, 10);
+    if (!o.createdAt) return;
+
+    const dateObj = new Date(o.createdAt);
+    if (isNaN(dateObj.getTime())) return;
+
+    const date = dateObj.toISOString().slice(0, 10);
+
     ordersByDate[date] =
       (ordersByDate[date] || 0) + 1;
   });
 
   return (
-    <div>
+    <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">
         Admin Dashboard
       </h1>
 
-      {/* 🔢 KPI CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      {/* KPI CARDS */}
+      <div className="grid md:grid-cols-3 gap-6 mb-10">
         <Card title="Total Orders" value={totalOrders} />
-        <Card
-          title="Total Revenue"
-          value={`₹${totalRevenue}`}
-        />
-        <Card
-          title="Customers"
-          value={customers.length}
-        />
+        <Card title="Total Revenue" value={`₹${totalRevenue}`} />
+        <Card title="Customers" value={customers.length} />
       </div>
 
-      {/* 📊 ANALYTICS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* 👤 TOP CUSTOMERS */}
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* TOP CUSTOMERS */}
         <div className="bg-white p-6 rounded shadow">
           <h2 className="font-semibold mb-4">
             Top Customers
           </h2>
+
+          {topCustomers.length === 0 && (
+            <p className="text-gray-500">
+              No customers yet
+            </p>
+          )}
 
           {topCustomers.map(([email, count]) => (
             <div
@@ -82,11 +100,17 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* 📅 ORDERS PER DAY */}
+        {/* ORDERS PER DAY */}
         <div className="bg-white p-6 rounded shadow">
           <h2 className="font-semibold mb-4">
             Orders per Day
           </h2>
+
+          {Object.keys(ordersByDate).length === 0 && (
+            <p className="text-gray-500">
+              No order data available
+            </p>
+          )}
 
           {Object.entries(ordersByDate).map(
             ([date, count]) => (
@@ -99,7 +123,7 @@ export default function AdminDashboard() {
                   <div
                     className="bg-caviro h-2 rounded"
                     style={{
-                      width: `${count * 10}%`,
+                      width: `${Math.min(count * 10, 100)}%`,
                     }}
                   />
                 </div>
@@ -112,7 +136,6 @@ export default function AdminDashboard() {
   );
 }
 
-/* 🧩 CARD COMPONENT */
 function Card({ title, value }) {
   return (
     <div className="bg-white rounded shadow p-6">
@@ -123,4 +146,3 @@ function Card({ title, value }) {
     </div>
   );
 }
-

@@ -9,53 +9,24 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
 
-    const storedUser = JSON.parse(
-      localStorage.getItem("authUser")
-    );
-
-    if (!storedUser) {
-      alert("No user found. Please register first.");
-      return;
-    }
-
-    if (
-      storedUser.email !== email ||
-      storedUser.password !== password
-    ) {
-      alert("Invalid email or password");
-      return;
-    }
-
-    login(storedUser);
-
-    navigate(
-      storedUser.role === "admin" ? "/admin" : "/"
-    );
+    await login(email, password);
+    navigate("/");
   };
 
   return (
-    <form
-      onSubmit={handleLogin}
-      className="max-w-md mx-auto mt-20 space-y-4"
-    >
+    <form onSubmit={submitHandler} className="max-w-md mx-auto mt-20 space-y-4">
       <h2 className="text-2xl font-bold text-center">Login</h2>
 
-      <input
-        type="email"
-        placeholder="Email"
-        required
+      <input type="email" required
         className="border p-2 w-full"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <input
-        type="password"
-        placeholder="Password"
-        required
+      <input type="password" required
         className="border p-2 w-full"
         value={password}
         onChange={(e) => setPassword(e.target.value)}

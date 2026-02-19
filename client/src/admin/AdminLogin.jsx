@@ -11,9 +11,9 @@ export default function AdminLogin() {
 
     if (username === "admin" && password === "1234") {
       localStorage.setItem("isAdmin", "true");
-      navigate("/admin");
+      navigate("/admin/dashboard");
     } else {
-      alert("Invalid admin credentials");
+      alert("Invalid credentials");
     }
   };
 
@@ -23,7 +23,7 @@ export default function AdminLogin() {
         onSubmit={handleLogin}
         className="bg-white p-8 rounded-xl shadow w-full max-w-sm"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-caviro">
+        <h2 className="text-2xl font-bold mb-6 text-center">
           Admin Login
         </h2>
 

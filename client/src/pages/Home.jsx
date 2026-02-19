@@ -62,7 +62,7 @@ export default function Home() {
           />
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 mb-20">
             {filterProducts(newArrivals).map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </>
@@ -77,7 +77,7 @@ export default function Home() {
           />
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 mb-20">
             {filterProducts(trending).map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </>
@@ -92,7 +92,7 @@ export default function Home() {
           />
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 mb-20">
             {filterProducts(products).map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>

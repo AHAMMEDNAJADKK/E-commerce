@@ -21,22 +21,21 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
-
       {/* IMAGE */}
       <div className="relative">
-      <img
-  src={`http://localhost:5000/${product.image}`}
-  alt={product.name}
-/>
+        <img
+          src={
+            product.image
+              ? `http://localhost:5000/${product.image}`
+              : "/placeholder.png"
+          }
+          alt={product.name}
+        />
 
         {/* QUALITY BADGE */}
         <span
           className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full text-white
-            ${
-              product.quality === "10A"
-                ? "bg-caviro"
-                : "bg-[#4f7c2f]"
-            }`}
+            ${product.quality === "10A" ? "bg-caviro" : "bg-[#4f7c2f]"}`}
         >
           {product.quality} Quality
         </span>
@@ -46,9 +45,7 @@ export default function ProductCard({ product }) {
       <p className="text-sm text-gray-500">{product.brand}</p>
 
       <div className="flex justify-between items-center mt-3">
-        <span className="font-bold text-caviro">
-          ₹{product.price}
-        </span>
+        <span className="font-bold text-caviro">₹{product.price}</span>
 
         <button
           onClick={handleAddToCart}

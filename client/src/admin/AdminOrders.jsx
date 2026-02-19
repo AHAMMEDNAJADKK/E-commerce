@@ -1,122 +1,35 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminOrders() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const savedOrders =
-      JSON.parse(localStorage.getItem("orders")) || [];
-    setOrders(savedOrders);
-  }, []);
+    const fetchOrders = async () => {
+      const { data } = await axios.get("/api/orders", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      setOrders(data);
+    };
 
-  const updateStatus = (id, status) => {
-    const updated = orders.map((o) =>
-      o.id === id ? { ...o, status } : o
-    );
-
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
-
-  const deleteOrder = (id) => {
-    if (!confirm("Delete this order?")) return;
-
-    const updated = orders.filter(
-      (o) => o.id !== id
-    );
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
+    if (user?.isAdmin) fetchOrders();
+  }, [user]);
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">
-        Orders Management
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">All Orders</h1>
 
-      <div className="overflow-x-auto bg-white rounded shadow">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <Th>#</Th>
-              <Th>Customer</Th>
-              <Th>Items</Th>
-              <Th>Amount</Th>
-              <Th>Date</Th>
-              <Th>Status</Th>
-              <Th>Action</Th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {orders.length === 0 && (
-              <tr>
-                <td
-                  colSpan="7"
-                  className="text-center py-6"
-                >
-                  No orders found
-                </td>
-              </tr>
-            )}
-
-            {orders.map((o, i) => (
-              <tr
-                key={o.id}
-                className="border-t text-center"
-              >
-                <Td>{i + 1}</Td>
-                <Td>{o.userEmail}</Td>
-                <Td>{o.items?.length || 0}</Td>
-                <Td>₹{o.amount}</Td>
-                <Td>
-                  {new Date(o.createdAt).toLocaleDateString()}
-                </Td>
-
-                <Td>
-                  <select
-                    value={o.status}
-                    onChange={(e) =>
-                      updateStatus(
-                        o.id,
-                        e.target.value
-                      )
-                    }
-                    className="border px-2 py-1 rounded"
-                  >
-                    <option>Paid</option>
-                    <option>Shipped</option>
-                    <option>Delivered</option>
-                    <option>Cancelled</option>
-                  </select>
-                </Td>
-
-                <Td>
-                  <button
-                    onClick={() => deleteOrder(o.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {orders.map((o) => (
+        <div key={o._id} className="border p-4 mb-3">
+          <p>User: {o.user.name}</p>
+          <p>Total: ₹{o.totalPrice}</p>
+          <p>Status: {o.isPaid ? "Paid" : "Not Paid"}</p>
+        </div>
+      ))}
     </div>
   );
 }
-
-/* 🧩 SMALL COMPONENTS */
-const Th = ({ children }) => (
-  <th className="px-4 py-3 text-left">
-    {children}
-  </th>
-);
-
-const Td = ({ children }) => (
-  <td className="px-4 py-3">
-    {children}
-  </td>
-);
