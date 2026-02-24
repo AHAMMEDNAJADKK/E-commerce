@@ -3,21 +3,26 @@ import { createContext, useContext, useState } from "react";
 const ProductFilterContext = createContext();
 
 export function ProductFilterProvider({ children }) {
-  const [brandFilter, setBrandFilter] = useState("ALL");
-  const [qualityFilter, setQualityFilter] = useState("ALL");
+  const [brandFilter, setBrandFilter] = useState("all");
+  const [qualityFilter, setQualityFilter] = useState("all");
   const [search, setSearch] = useState("");
 
   const filterProducts = (products) => {
     return products.filter((p) => {
+      const productBrand = (p.brand || "").toLowerCase().trim();
+      const selectedBrand = brandFilter.toLowerCase().trim();
+
       const matchBrand =
-        brandFilter === "ALL" || p.brand === brandFilter;
+        selectedBrand === "all" || productBrand === selectedBrand;
 
       const matchQuality =
-        qualityFilter === "ALL" || p.quality === qualityFilter;
+        qualityFilter === "all" ||
+        (p.quality || "").toLowerCase() === qualityFilter.toLowerCase();
 
-      const matchSearch = p.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const matchSearch =
+        (p.name || "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
       return matchBrand && matchQuality && matchSearch;
     });

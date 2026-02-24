@@ -1,9 +1,10 @@
 import { useCart } from "../context/CartContext";
 import loadRazorpay from "../utils/razorpay";
-
+import { useToast } from "../context/ToastContext";
 
 export default function Cart() {
   const { cartItems, removeFromCart, updateQty } = useCart();
+  const { showToast } = useToast();
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.price * item.qty,
@@ -12,7 +13,7 @@ export default function Cart() {
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
-      alert("Cart is empty");
+      showToast("Cart is empty");
       return;
     }
 
@@ -36,7 +37,7 @@ export default function Cart() {
         });
 
         localStorage.setItem("orders", JSON.stringify(orders));
-        alert("Payment successful!");
+        showToast("Payment successful 🎉");
       },
       theme: {
         color: "#111827",
@@ -58,7 +59,7 @@ export default function Cart() {
         <>
           {cartItems.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className="flex justify-between items-center border-b py-4"
             >
               <div>
@@ -75,13 +76,13 @@ export default function Cart() {
                   min="1"
                   value={item.qty}
                   onChange={(e) =>
-                    updateQty(item.id, Number(e.target.value))
+                    updateQty(item._id, Number(e.target.value))
                   }
                   className="w-16 border p-1"
                 />
 
                 <button
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item._id)}
                   className="text-red-600 hover:underline"
                 >
                   Remove

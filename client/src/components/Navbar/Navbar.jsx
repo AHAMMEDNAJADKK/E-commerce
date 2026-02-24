@@ -28,9 +28,11 @@ export default function Navbar() {
     "Loafer",
   ];
 
+  const closeMenu = () => setMobileOpen(false);
+
   return (
     <header className="w-full sticky top-0 z-50 bg-white shadow-sm">
-      {/* 🔹 TOP BAR (USER ONLY) */}
+      {/* 🔹 TOP BAR */}
       {!isAdmin && (
         <div className="bg-caviro text-white overflow-hidden">
           <div className="flex items-center gap-10 whitespace-nowrap px-6 py-2 text-sm animate-[marquee_22s_linear_infinite]">
@@ -46,9 +48,9 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* 🔹 MAIN NAVBAR */}
       <div className="border-b">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+          
           {/* LOGO */}
           <NavLink
             to={isAdmin ? "/admin" : "/"}
@@ -65,10 +67,7 @@ export default function Navbar() {
                   Dashboard
                 </NavLink>
 
-                <NavLink
-                  to="/admin-orders"
-                  className="nav-link"
-                >
+                <NavLink to="/admin-orders" className="nav-link">
                   Orders
                 </NavLink>
 
@@ -96,19 +95,14 @@ export default function Navbar() {
                   About
                 </NavLink>
 
-                <NavLink
-                  to="/contact"
-                  className="nav-link"
-                >
+                <NavLink to="/contact" className="nav-link">
                   Contact
                 </NavLink>
 
                 <input
                   type="text"
                   placeholder="Search sneakers..."
-                  onChange={(e) =>
-                    setSearch(e.target.value)
-                  }
+                  onChange={(e) => setSearch(e.target.value)}
                   className="border rounded-full px-4 py-1.5 text-sm"
                 />
 
@@ -129,10 +123,7 @@ export default function Navbar() {
                 </select>
 
                 {user?.role === "user" && (
-                  <NavLink
-                    to="/orders"
-                    className="nav-link"
-                  >
+                  <NavLink to="/orders" className="nav-link">
                     Orders
                   </NavLink>
                 )}
@@ -147,10 +138,17 @@ export default function Navbar() {
 
                 {!user ? (
                   <>
-                    <NavLink to="/login">
+                    <NavLink
+                      to="/login"
+                      className="border border-caviro px-4 py-1 rounded-full"
+                    >
                       Login
                     </NavLink>
-                    <NavLink to="/register">
+
+                    <NavLink
+                      to="/register"
+                      className="bg-caviro text-white px-4 py-1 rounded-full"
+                    >
                       Register
                     </NavLink>
                   </>
@@ -166,7 +164,7 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* 🔹 MOBILE MENU BUTTON */}
+          {/* 🔹 MOBILE BUTTON */}
           <button
             className="md:hidden text-2xl text-caviro"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -177,18 +175,30 @@ export default function Navbar() {
 
         {/* 🔹 MOBILE MENU */}
         {mobileOpen && (
-          <div className="md:hidden border-t px-6 py-4 space-y-4">
+          <div className="md:hidden bg-white shadow-lg rounded-b-2xl px-6 py-6 flex flex-col items-center gap-6 text-center">
             {isAdmin ? (
               <>
-                <NavLink to="/admin">Dashboard</NavLink>
-                <NavLink to="/admin-orders">
+                <NavLink to="/admin" onClick={closeMenu}>
+                  Dashboard
+                </NavLink>
+
+                <NavLink to="/admin-orders" onClick={closeMenu}>
                   Orders
                 </NavLink>
-                <NavLink to="/admin/add-product">
+
+                <NavLink
+                  to="/admin/add-product"
+                  onClick={closeMenu}
+                  className="bg-caviro text-white px-6 py-2 rounded-full"
+                >
                   Add Product
                 </NavLink>
+
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    closeMenu();
+                  }}
                   className="text-red-600"
                 >
                   Logout
@@ -196,25 +206,46 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <NavLink to="/">Home</NavLink>
-                <NavLink to="/about">About</NavLink>
-                <NavLink to="/contact">
+                <NavLink to="/" onClick={closeMenu}>
+                  Home
+                </NavLink>
+
+                <NavLink to="/about" onClick={closeMenu}>
+                  About
+                </NavLink>
+
+                <NavLink to="/contact" onClick={closeMenu}>
                   Contact
                 </NavLink>
-                <NavLink to="/cart">Cart</NavLink>
+
+                <NavLink to="/cart" onClick={closeMenu}>
+                  Cart
+                </NavLink>
 
                 {!user ? (
-                  <>
-                    <NavLink to="/login">
+                  <div className="w-full flex flex-col gap-3 pt-4 border-t">
+                    <NavLink
+                      to="/login"
+                      onClick={closeMenu}
+                      className="border border-caviro py-2 rounded-full"
+                    >
                       Login
                     </NavLink>
-                    <NavLink to="/register">
+
+                    <NavLink
+                      to="/register"
+                      onClick={closeMenu}
+                      className="bg-caviro text-white py-2 rounded-full"
+                    >
                       Register
                     </NavLink>
-                  </>
+                  </div>
                 ) : (
                   <button
-                    onClick={logout}
+                    onClick={() => {
+                      logout();
+                      closeMenu();
+                    }}
                     className="text-red-600"
                   >
                     Logout

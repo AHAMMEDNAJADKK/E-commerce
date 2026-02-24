@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
+  // ✅ Load user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("userInfo");
     if (storedUser) {
@@ -14,15 +15,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // 🔐 LOGIN
-  const login = async (email, password) => {
+  const login = async (formData) => {
     try {
-      const { data } = await axios.post("/api/auth/login", {
-        email,
-        password,
-      });
+      const { data } = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        formData   // ✅ send directly
+      );
 
       localStorage.setItem("userInfo", JSON.stringify(data));
       setUser(data);
+      return data;
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
       throw error;
@@ -30,16 +32,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 🔐 REGISTER
-  const register = async (name, email, password) => {
+  const register = async (formData) => {
     try {
-      const { data } = await axios.post("/api/auth/register", {
-        name,
-        email,
-        password,
-      });
+      const { data } = await axios.post(
+        "http://localhost:5000/api/auth/register",
+        formData   // ✅ send directly
+      );
 
       localStorage.setItem("userInfo", JSON.stringify(data));
       setUser(data);
+      return data;
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
       throw error;

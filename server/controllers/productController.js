@@ -12,12 +12,20 @@ export const getProducts = async (req, res) => {
 // @route   POST /api/products
 // @access  Admin
 export const createProduct = async (req, res) => {
-  const { name, price, quality, isNewArrival, isTrending } = req.body;
-
-  const product = new Product({
+  const {
     name,
     price,
+    brand, // ✅ ADDED
     quality,
+    isNewArrival,
+    isTrending,
+  } = req.body;
+
+  const product = new Product({
+    name: name?.trim(),
+    price,
+    brand: brand?.trim().toLowerCase(), // ✅ IMPORTANT FIX
+    quality: quality?.trim(),
     isNewArrival,
     isTrending,
     image: req.file ? `/uploads/${req.file.filename}` : "",
@@ -37,11 +45,19 @@ export const updateProduct = async (req, res) => {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  product.name = req.body.name ?? product.name;
+  product.name = req.body.name?.trim() ?? product.name;
   product.price = req.body.price ?? product.price;
-  product.quality = req.body.quality ?? product.quality;
+
+  // ✅ BRAND UPDATE FIX
+  if (req.body.brand) {
+    product.brand = req.body.brand.trim().toLowerCase();
+  }
+
+  product.quality = req.body.quality?.trim() ?? product.quality;
+
   product.isNewArrival =
     req.body.isNewArrival ?? product.isNewArrival;
+
   product.isTrending =
     req.body.isTrending ?? product.isTrending;
 

@@ -12,36 +12,50 @@ export default function Register() {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
     await register(name, email, password);
     navigate("/");
   };
 
   return (
-    <form onSubmit={submitHandler} className="max-w-md mx-auto mt-20 space-y-4">
-      <h2 className="text-2xl font-bold text-center">Register</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8">
+        <h2 className="text-3xl font-bold text-center text-caviro mb-6">
+          Create Your Account
+        </h2>
 
-      <input type="text" required placeholder="Name"
-        className="border p-2 w-full"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+        <form onSubmit={submitHandler} className="space-y-5">
+          <input
+            type="text"
+            required
+            placeholder="Full Name"
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-      <input type="email" required placeholder="Email"
-        className="border p-2 w-full"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+          <input
+            type="email"
+            required
+            placeholder="Email Address"
+            className="input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-      <input type="password" required placeholder="Password"
-        className="border p-2 w-full"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <input
+            type="password"
+            required
+            placeholder="Password"
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      <button className="bg-caviro text-white w-full py-2 rounded">
-        Register
-      </button>
-    </form>
+          <button className="w-full bg-caviro text-white py-3 rounded-full font-semibold hover:opacity-90 transition">
+            Register
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
