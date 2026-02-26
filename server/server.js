@@ -14,6 +14,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 
 import { protect, adminOnly } from "./middleware/authMiddleware.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import contactRoutes from "./routes/contactRoutes.js"
 
 
 connectDB();
@@ -31,6 +32,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/contact",contactRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Running");

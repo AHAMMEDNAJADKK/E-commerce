@@ -1,7 +1,51 @@
+import { useState } from "react";
+import axios from "axios";
+
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      await axios.post("/api/contact", formData);
+
+      setSuccess("Message sent successfully! 🎉");
+      setFormData({
+        name: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="px-6 md:px-16 py-14 max-w-6xl mx-auto">
-      
       {/* HERO */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-extrabold text-caviro mb-4">
@@ -14,7 +58,6 @@ export default function Contact() {
 
       {/* CONTENT */}
       <div className="grid md:grid-cols-2 gap-12">
-        
         {/* LEFT INFO */}
         <div className="space-y-8">
           <div>
@@ -56,30 +99,57 @@ export default function Contact() {
             Send Us a Message
           </h2>
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <input
               type="text"
+              name="name"
               placeholder="Your Name"
+              value={formData.name}
+              onChange={handleChange}
+              required
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-caviro"
             />
 
             <input
               type="email"
+              name="email"
               placeholder="Your Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-caviro"
             />
 
             <textarea
+              name="message"
               placeholder="Your Message"
               rows="5"
+              value={formData.message}
+              onChange={handleChange}
+              required
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-caviro"
             />
 
+            {/* SUCCESS MESSAGE */}
+            {success && (
+              <p className="text-green-600 text-sm font-medium">
+                {success}
+              </p>
+            )}
+
+            {/* ERROR MESSAGE */}
+            {error && (
+              <p className="text-red-600 text-sm font-medium">
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-caviro text-white py-3 rounded-full font-semibold hover:opacity-90 transition"
+              disabled={loading}
+              className="w-full bg-caviro text-white py-3 rounded-full font-semibold hover:opacity-90 transition disabled:opacity-60"
             >
-              Send Message
+              {loading ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>

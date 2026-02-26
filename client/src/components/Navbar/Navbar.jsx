@@ -4,13 +4,14 @@ import {
   FaShoppingCart,
   FaBars,
 } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useProductFilter } from "../../context/ProductFilterContext";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
 
   const { user, logout } = useAuth();
   const isAdmin = user?.role === "admin";
@@ -30,9 +31,15 @@ export default function Navbar() {
 
   const closeMenu = () => setMobileOpen(false);
 
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+    navigate("/");
+  };
+
   return (
     <header className="w-full sticky top-0 z-50 bg-white shadow-sm">
-      {/* 🔹 TOP BAR */}
+      {/* TOP BAR */}
       {!isAdmin && (
         <div className="bg-caviro text-white overflow-hidden">
           <div className="flex items-center gap-10 whitespace-nowrap px-6 py-2 text-sm animate-[marquee_22s_linear_infinite]">
@@ -50,7 +57,7 @@ export default function Navbar() {
 
       <div className="border-b">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          
+
           {/* LOGO */}
           <NavLink
             to={isAdmin ? "/admin" : "/"}
@@ -59,7 +66,7 @@ export default function Navbar() {
             Wear Caviro
           </NavLink>
 
-          {/* 🔹 DESKTOP MENU */}
+          {/* DESKTOP MENU */}
           <nav className="hidden md:flex items-center gap-6 font-medium">
             {isAdmin ? (
               <>
@@ -71,6 +78,11 @@ export default function Navbar() {
                   Orders
                 </NavLink>
 
+                {/* ✅ NEW MESSAGES LINK */}
+                <NavLink to="/admin/messages" className="nav-link">
+                  Messages
+                </NavLink>
+
                 <NavLink
                   to="/admin/add-product"
                   className="bg-caviro text-white px-5 py-2 rounded-full text-sm font-semibold"
@@ -79,7 +91,7 @@ export default function Navbar() {
                 </NavLink>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="text-red-600 font-medium"
                 >
                   Logout
@@ -154,7 +166,7 @@ export default function Navbar() {
                   </>
                 ) : (
                   <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="text-red-600"
                   >
                     Logout
@@ -164,7 +176,7 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* 🔹 MOBILE BUTTON */}
+          {/* MOBILE BUTTON */}
           <button
             className="md:hidden text-2xl text-caviro"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -173,7 +185,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* 🔹 MOBILE MENU */}
+        {/* MOBILE MENU */}
         {mobileOpen && (
           <div className="md:hidden bg-white shadow-lg rounded-b-2xl px-6 py-6 flex flex-col items-center gap-6 text-center">
             {isAdmin ? (
@@ -186,6 +198,14 @@ export default function Navbar() {
                   Orders
                 </NavLink>
 
+                {/* ✅ NEW MESSAGES LINK (MOBILE) */}
+                <NavLink
+                  to="/admin/messages"
+                  onClick={closeMenu}
+                >
+                  Messages
+                </NavLink>
+
                 <NavLink
                   to="/admin/add-product"
                   onClick={closeMenu}
@@ -195,10 +215,7 @@ export default function Navbar() {
                 </NavLink>
 
                 <button
-                  onClick={() => {
-                    logout();
-                    closeMenu();
-                  }}
+                  onClick={handleLogout}
                   className="text-red-600"
                 >
                   Logout
@@ -242,10 +259,7 @@ export default function Navbar() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => {
-                      logout();
-                      closeMenu();
-                    }}
+                    onClick={handleLogout}
                     className="text-red-600"
                   >
                     Logout

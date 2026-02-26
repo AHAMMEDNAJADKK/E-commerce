@@ -13,6 +13,7 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AdminAddProduct from "./admin/AdminAddProduct.jsx";
 import AdminOrders from "./admin/AdminOrders";
 import AdminLogin from "./admin/AdminLogin.jsx";
+import AdminContactMessages from "./admin/AdminContactMessages.jsx";
 
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -180,6 +181,18 @@ export default function App() {
               <AdminRoute>
                 <PageWrapper>
                   <AdminOrders />
+                </PageWrapper>
+              </AdminRoute>
+            }
+          />
+
+          {/* ✅ NEW ADMIN MESSAGES ROUTE */}
+          <Route
+            path="/admin/messages"
+            element={
+              <AdminRoute>
+                <PageWrapper>
+                  <AdminContactMessages />
                 </PageWrapper>
               </AdminRoute>
             }

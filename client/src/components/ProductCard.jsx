@@ -2,6 +2,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
+import { getImageUrl } from "../utils/imageHelper";
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -11,18 +12,13 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = () => {
     if (!user) {
-      showToast(
-        "Please login or register to add products to cart",
-        "error"
-      );
+      showToast("Please login or register to add products to cart", "error");
       navigate("/login");
       return;
     }
 
     addToCart(product, false);
-
     showToast("Product added to cart successfully 🛒", "success");
-
     navigate("/cart");
   };
 
@@ -30,11 +26,7 @@ export default function ProductCard({ product }) {
     <div className="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
       <div className="relative">
         <img
-          src={
-            product.image
-              ? `http://localhost:5000${product.image}`   // ✅ FIXED HERE
-              : "/placeholder.png"
-          }
+          src={getImageUrl(product.image)}
           alt={product.name}
           className="w-full h-48 object-cover rounded-lg"
         />
