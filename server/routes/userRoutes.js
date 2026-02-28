@@ -3,6 +3,8 @@ import {
   getUserProfile,
   getAllUsers,
   deleteUser,
+  blockUser,
+  makeAdmin
 } from "../controllers/userController.js";
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
@@ -15,6 +17,8 @@ router.get("/profile", protect, getUserProfile);
 // 🔐 Admin routes
 router.get("/", protect, adminOnly, getAllUsers);
 router.delete("/:id", protect, adminOnly, deleteUser);
+router.put("/:id/block", protect, adminOnly, blockUser);
+router.put("/:id/admin", protect, adminOnly, makeAdmin);
 
 export default router;
 

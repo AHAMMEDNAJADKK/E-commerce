@@ -1,134 +1,159 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 🔐 Protect dashboard
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    if (!userInfo || !userInfo.token) {
+
+    if (!userInfo || userInfo.role !== "admin") {
       navigate("/login");
       return;
     }
 
-    const savedOrders =
-      JSON.parse(localStorage.getItem("orders")) || [];
+    const fetchOrders = async () => {
+      try {
+        const { data } = await axios.get(
+          "http://localhost:5000/api/orders",
+          {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+        );
 
-    setOrders(savedOrders);
+        setOrders(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, [navigate]);
 
-  /* 📦 METRICS */
-  const totalOrders = orders.length;
+  if (loading) {
+    return <div className="p-10 text-center">Loading Dashboard...</div>;
+  }
 
+  // 📊 Metrics
+  const totalOrders = orders.length;
   const totalRevenue = orders.reduce(
-    (sum, o) => sum + Number(o.amount || 0),
+    (sum, o) => sum + o.totalPrice,
     0
   );
 
-  const customers = [
-    ...new Set(
-      orders
-        .filter((o) => o.userEmail)
-        .map((o) => o.userEmail)
-    ),
-  ];
+  const today = new Date().toISOString().slice(0, 10);
 
-  /* 👤 TOP CUSTOMERS */
-  const customerStats = {};
-  orders.forEach((o) => {
-    if (!o.userEmail) return;
-    customerStats[o.userEmail] =
-      (customerStats[o.userEmail] || 0) + 1;
-  });
-
-  const topCustomers = Object.entries(customerStats).sort(
-    (a, b) => b[1] - a[1]
+  const todayOrders = orders.filter(
+    (o) => o.createdAt?.slice(0, 10) === today
   );
 
-  /* 📅 ORDERS PER DAY (SAFE DATE FIX) */
+  // 📈 Orders Per Day
   const ordersByDate = {};
   orders.forEach((o) => {
-    if (!o.createdAt) return;
-
-    const dateObj = new Date(o.createdAt);
-    if (isNaN(dateObj.getTime())) return;
-
-    const date = dateObj.toISOString().slice(0, 10);
-
+    const date = o.createdAt?.slice(0, 10);
+    if (!date) return;
     ordersByDate[date] =
       (ordersByDate[date] || 0) + 1;
   });
 
+  const chartData = Object.keys(ordersByDate).map(
+    (date) => ({
+      date,
+      orders: ordersByDate[date],
+    })
+  );
+
+  // 👑 Top Customers
+  const customerMap = {};
+  orders.forEach((o) => {
+    const email = o.user?.email;
+    if (!email) return;
+    customerMap[email] =
+      (customerMap[email] || 0) + 1;
+  });
+
+  const topCustomers = Object.entries(customerMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-4xl font-bold mb-8">
         Admin Dashboard
       </h1>
 
       {/* KPI CARDS */}
-      <div className="grid md:grid-cols-3 gap-6 mb-10">
+      <div className="grid md:grid-cols-4 gap-6 mb-10">
         <Card title="Total Orders" value={totalOrders} />
-        <Card title="Total Revenue" value={`₹${totalRevenue}`} />
-        <Card title="Customers" value={customers.length} />
+        <Card title="Today's Orders" value={todayOrders.length} />
+        <Card title="Revenue" value={`₹${totalRevenue}`} />
+        <Card title="Customers" value={Object.keys(customerMap).length} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* TOP CUSTOMERS */}
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="font-semibold mb-4">
+        {/* 📊 Chart */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h2 className="text-xl font-semibold mb-6">
+            Orders Overview
+          </h2>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="orders" fill="#111827" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* 🏆 Top Customers */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h2 className="text-xl font-semibold mb-6">
             Top Customers
           </h2>
 
-          {topCustomers.length === 0 && (
-            <p className="text-gray-500">
-              No customers yet
-            </p>
-          )}
-
-          {topCustomers.map(([email, count]) => (
-            <div
-              key={email}
-              className="flex justify-between border-b py-2"
-            >
-              <span>{email}</span>
-              <span className="font-bold">
-                {count} orders
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* ORDERS PER DAY */}
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="font-semibold mb-4">
-            Orders per Day
-          </h2>
-
-          {Object.keys(ordersByDate).length === 0 && (
-            <p className="text-gray-500">
-              No order data available
-            </p>
-          )}
-
-          {Object.entries(ordersByDate).map(
-            ([date, count]) => (
-              <div key={date} className="mb-2">
-                <div className="flex justify-between text-sm">
-                  <span>{date}</span>
-                  <span>{count}</span>
-                </div>
-                <div className="bg-gray-200 h-2 rounded">
-                  <div
-                    className="bg-caviro h-2 rounded"
-                    style={{
-                      width: `${Math.min(count * 10, 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            )
+          {topCustomers.length === 0 ? (
+            <p>No customers yet</p>
+          ) : (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b">
+                  <th>Email</th>
+                  <th>Orders</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topCustomers.map(([email, count]) => (
+                  <tr
+                    key={email}
+                    className="border-b hover:bg-gray-50"
+                  >
+                    <td className="py-3">{email}</td>
+                    <td className="py-3 font-bold">
+                      {count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
@@ -138,8 +163,8 @@ export default function AdminDashboard() {
 
 function Card({ title, value }) {
   return (
-    <div className="bg-white rounded shadow p-6">
-      <p className="text-gray-500 text-sm">{title}</p>
+    <div className="bg-white rounded-2xl shadow-xl p-6">
+      <p className="text-gray-500">{title}</p>
       <h2 className="text-3xl font-bold mt-2">
         {value}
       </h2>

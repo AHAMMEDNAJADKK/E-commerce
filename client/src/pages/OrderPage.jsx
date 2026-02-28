@@ -10,12 +10,16 @@ export default function OrderPage() {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const { data } = await axios.get(`/api/orders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-      setOrder(data);
+      try {
+        const { data } = await axios.get(`/api/orders/${id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+        setOrder(data);
+      } catch (error) {
+        console.error("ORDER FETCH ERROR:", error.response?.data || error.message);
+      }
     };
 
     if (user) fetchOrder();

@@ -1,10 +1,13 @@
 import { useCart } from "../context/CartContext";
 import loadRazorpay from "../utils/razorpay";
 import { useToast } from "../context/ToastContext";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
-  const { cartItems, removeFromCart, updateQty } = useCart();
+  const { cartItems, removeFromCart, updateQty,clearCart } = useCart();
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.price * item.qty,
@@ -17,6 +20,14 @@ export default function Cart() {
       return;
     }
 
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+    if (!userInfo || !userInfo.token) {
+      showToast("Please login first 🔐");
+      navigate("/login");
+      return;
+    }
+
     await loadRazorpay();
 
     const options = {
@@ -25,26 +36,66 @@ export default function Cart() {
       currency: "INR",
       name: "Wear Caviro",
       description: "Sneaker Order",
-      handler: function () {
-        const orders =
-          JSON.parse(localStorage.getItem("orders")) || [];
 
-        orders.push({
-          items: cartItems,
-          amount: total,
-          status: "Paid",
-          date: new Date().toLocaleString(),
-        });
+      handler: async function (response) {
+        try {
+          // ✅ FIXED ORDER DATA FORMAT
+          const orderData = {
+            orderItems: cartItems.map((item) => ({
+              name: item.name,
+              qty: item.qty,
+              image: item.image || "",
+              price: item.price,
+              product: item._id, // 🔥 REQUIRED FIELD
+            })),
+            shippingAddress: {
+              address: "Online Payment",
+              city: "N/A",
+              postalCode: "000000",
+              country: "India",
+            },
+            paymentMethod: "Razorpay",
+            totalPrice: total,
+            paymentResult: {
+              id: response.razorpay_payment_id,
+              status: "completed",
+              update_time: new Date().toISOString(),
+              email_address: userInfo.email,
+            },
+          };
 
-        localStorage.setItem("orders", JSON.stringify(orders));
-        showToast("Payment successful 🎉");
+          await axios.post(
+            "http://localhost:5000/api/orders", // ✅ Ensure backend port
+            orderData,
+            {
+              headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          showToast("Payment successful 🎉 Order saved!");
+
+          clearCart();
+          navigate("/myorders");
+
+        } catch (error) {
+          console.error(
+            "ORDER SAVE ERROR:",
+            error.response?.data || error.message
+          );
+          showToast("Order saving failed ❌");
+        }
       },
+
       theme: {
         color: "#111827",
       },
     };
 
-    new window.Razorpay(options).open();
+    const razor = new window.Razorpay(options);
+    razor.open();
   };
 
   return (

@@ -1,13 +1,14 @@
 import Order from "../models/Order.js";
+import { Parser } from "json2csv";
 
-// CREATE ORDER
+
+
+/* =====================================================
+   CREATE ORDER
+===================================================== */
 export const createOrder = async (req, res) => {
   try {
-    const {
-      orderItems,
-      shippingAddress,
-      totalPrice
-    } = req.body;
+    const { orderItems, shippingAddress, totalPrice } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
       return res.status(400).json({ message: "No order items" });
@@ -18,7 +19,6 @@ export const createOrder = async (req, res) => {
       user: req.user._id,
       shippingAddress,
       totalPrice,
-      isPaid: false,
     });
 
     const createdOrder = await order.save();
@@ -29,27 +29,244 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// GET SINGLE ORDER
+
+
+/* =====================================================
+   GET SINGLE ORDER
+===================================================== */
 export const getOrderById = async (req, res) => {
-  const order = await Order.findById(req.params.id)
-    .populate("user", "name email");
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("user", "name email");
 
-  if (!order) {
-    return res.status(404).json({ message: "Order not found" });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(order);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  res.json(order);
 };
 
-// GET MY ORDERS
+
+
+/* =====================================================
+   GET MY ORDERS
+===================================================== */
 export const getMyOrders = async (req, res) => {
-  const orders = await Order.find({ user: req.user._id });
-  res.json(orders);
+  try {
+    const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// ADMIN: GET ALL ORDERS
+
+
+/* =====================================================
+   ADMIN: GET ALL ORDERS
+===================================================== */
 export const getOrders = async (req, res) => {
-  const orders = await Order.find({})
-    .populate("user", "id name");
-  res.json(orders);
+  try {
+    const orders = await Order.find({})
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* =====================================================
+   ADMIN: MARK ORDER AS PAID
+===================================================== */
+export const markOrderPaid = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order)
+      return res.status(404).json({ message: "Order not found" });
+
+    order.isPaid = true;
+    order.paidAt = Date.now();
+
+    await order.save();
+
+    res.json({ message: "Order marked as paid" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* =====================================================
+   ADMIN: MARK ORDER AS DELIVERED
+===================================================== */
+export const markOrderDelivered = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order)
+      return res.status(404).json({ message: "Order not found" });
+
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+
+    await order.save();
+
+    res.json({ message: "Order marked as delivered" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* =====================================================
+   ADMIN DASHBOARD STATS (Revenue + Orders)
+===================================================== */
+export const getAdminDashboardStats = async (req, res) => {
+  try {
+    // Total Orders
+    const totalOrders = await Order.countDocuments();
+
+    // Total Revenue
+    const totalRevenueData = await Order.aggregate([
+      { $match: { isPaid: true } },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+
+    const totalRevenue = totalRevenueData[0]?.totalRevenue || 0;
+
+    // Today's Revenue
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayRevenueData = await Order.aggregate([
+      {
+        $match: {
+          isPaid: true,
+          createdAt: { $gte: today },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          revenue: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+
+    const todayRevenue = todayRevenueData[0]?.revenue || 0;
+
+    // This Month Revenue
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    const monthRevenueData = await Order.aggregate([
+      {
+        $match: {
+          isPaid: true,
+          createdAt: { $gte: firstDayOfMonth },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          revenue: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+
+    const monthRevenue = monthRevenueData[0]?.revenue || 0;
+
+    res.json({
+      totalOrders,
+      totalRevenue,
+      todayRevenue,
+      monthRevenue,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* =====================================================
+   ADMIN: EXPORT ORDERS AS CSV
+===================================================== */
+export const exportOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate("user", "name email");
+
+    const formattedOrders = orders.map((o) => ({
+      OrderID: o._id,
+      CustomerName: o.user?.name,
+      CustomerEmail: o.user?.email,
+      TotalPrice: o.totalPrice,
+      Paid: o.isPaid ? "Yes" : "No",
+      Delivered: o.isDelivered ? "Yes" : "No",
+      CreatedAt: o.createdAt,
+    }));
+
+    const parser = new Parser();
+    const csv = parser.parse(formattedOrders);
+
+    res.header("Content-Type", "text/csv");
+    res.attachment("orders.csv");
+    return res.send(csv);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* =====================================================
+   ADMIN: TOP SELLING PRODUCTS (Analytics)
+===================================================== */
+export const getTopProducts = async (req, res) => {
+  try {
+    const topProducts = await Order.aggregate([
+      { $unwind: "$orderItems" },
+      {
+        $group: {
+          _id: "$orderItems.product",
+          totalSold: { $sum: "$orderItems.qty" },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 5 },
+    ]);
+
+    res.json(topProducts);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
