@@ -8,28 +8,25 @@ import {
   markOrderDelivered,
   exportOrders,
   getTopProducts,
-  getAdminDashboardStats
+  getAdminDashboardStats,
 } from "../controllers/orderController.js";
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// User
 router.post("/", protect, createOrder);
-
 router.get("/myorders", protect, getMyOrders);
+router.get("/:id", protect, getOrderById);
 
-router.get("/export/csv", protect, adminOnly, exportOrders);
-router.get("/analytics/top-products", protect, adminOnly, getTopProducts);
-
+// Admin
 router.get("/", protect, adminOnly, getOrders);
+router.get("/admin/stats", protect, adminOnly, getAdminDashboardStats);
+router.get("/admin/top-products", protect, adminOnly, getTopProducts);
+router.get("/admin/export", protect, adminOnly, exportOrders);
 
 router.put("/:id/pay", protect, adminOnly, markOrderPaid);
 router.put("/:id/deliver", protect, adminOnly, markOrderDelivered);
-
-router.get("/:id", protect, getOrderById);
-router.get("/admin/stats", protect, adminOnly, getAdminDashboardStats);
-router.get("/admin/export", protect, adminOnly, exportOrders);
-router.get("/admin/top-products", protect, adminOnly, getTopProducts);
 
 export default router;

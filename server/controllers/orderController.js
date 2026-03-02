@@ -1,8 +1,6 @@
 import Order from "../models/Order.js";
 import { Parser } from "json2csv";
 
-
-
 /* =====================================================
    CREATE ORDER
 ===================================================== */
@@ -23,13 +21,10 @@ export const createOrder = async (req, res) => {
 
     const createdOrder = await order.save();
     res.status(201).json(createdOrder);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 /* =====================================================
    GET SINGLE ORDER
@@ -39,18 +34,14 @@ export const getOrderById = async (req, res) => {
     const order = await Order.findById(req.params.id)
       .populate("user", "name email");
 
-    if (!order) {
+    if (!order)
       return res.status(404).json({ message: "Order not found" });
-    }
 
     res.json(order);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 /* =====================================================
    GET MY ORDERS
@@ -61,13 +52,10 @@ export const getMyOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json(orders);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 /* =====================================================
    ADMIN: GET ALL ORDERS
@@ -79,13 +67,10 @@ export const getOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json(orders);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 /* =====================================================
    ADMIN: MARK ORDER AS PAID
@@ -103,13 +88,10 @@ export const markOrderPaid = async (req, res) => {
     await order.save();
 
     res.json({ message: "Order marked as paid" });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 /* =====================================================
    ADMIN: MARK ORDER AS DELIVERED
@@ -127,24 +109,19 @@ export const markOrderDelivered = async (req, res) => {
     await order.save();
 
     res.json({ message: "Order marked as delivered" });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-
-
 /* =====================================================
-   ADMIN DASHBOARD STATS (Revenue + Orders)
+   ADMIN DASHBOARD STATS (Optimized)
 ===================================================== */
 export const getAdminDashboardStats = async (req, res) => {
   try {
-    // Total Orders
     const totalOrders = await Order.countDocuments();
 
-    // Total Revenue
-    const totalRevenueData = await Order.aggregate([
+    const revenueData = await Order.aggregate([
       { $match: { isPaid: true } },
       {
         $group: {
@@ -154,9 +131,8 @@ export const getAdminDashboardStats = async (req, res) => {
       },
     ]);
 
-    const totalRevenue = totalRevenueData[0]?.totalRevenue || 0;
+    const totalRevenue = revenueData[0]?.totalRevenue || 0;
 
-    // Today's Revenue
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -177,7 +153,6 @@ export const getAdminDashboardStats = async (req, res) => {
 
     const todayRevenue = todayRevenueData[0]?.revenue || 0;
 
-    // This Month Revenue
     const firstDayOfMonth = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -207,13 +182,10 @@ export const getAdminDashboardStats = async (req, res) => {
       todayRevenue,
       monthRevenue,
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 /* =====================================================
    ADMIN: EXPORT ORDERS AS CSV
@@ -238,34 +210,38 @@ export const exportOrders = async (req, res) => {
 
     res.header("Content-Type", "text/csv");
     res.attachment("orders.csv");
-    return res.send(csv);
-
+    res.send(csv);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-
-
 /* =====================================================
-   ADMIN: TOP SELLING PRODUCTS (Analytics)
+   ADMIN: TOP SELLING PRODUCTS (Optimized + Name)
 ===================================================== */
 export const getTopProducts = async (req, res) => {
   try {
     const topProducts = await Order.aggregate([
+      { $match: { isPaid: true } }, // Only count paid orders
       { $unwind: "$orderItems" },
       {
         $group: {
-          _id: "$orderItems.product",
+          _id: "$orderItems.name",
           totalSold: { $sum: "$orderItems.qty" },
         },
       },
       { $sort: { totalSold: -1 } },
       { $limit: 5 },
+      {
+        $project: {
+          _id: 0,
+          name: "$_id",
+          quantity: "$totalSold",
+        },
+      },
     ]);
 
     res.json(topProducts);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

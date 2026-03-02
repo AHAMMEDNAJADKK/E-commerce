@@ -39,7 +39,8 @@ export default function Navbar() {
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white shadow-sm">
-      {/* TOP BAR */}
+      
+      {/* TOP BAR (HIDDEN FOR ADMIN) */}
       {!isAdmin && (
         <div className="bg-caviro text-white overflow-hidden">
           <div className="flex items-center gap-10 whitespace-nowrap px-6 py-2 text-sm animate-[marquee_22s_linear_infinite]">
@@ -67,18 +68,23 @@ export default function Navbar() {
           </NavLink>
 
           {/* DESKTOP MENU */}
-          <nav className="hidden md:flex items-center gap-6 font-medium">
+          <nav className="hidden md:flex items-center gap-8 font-medium">
+
             {isAdmin ? (
               <>
                 <NavLink to="/admin" className="nav-link">
                   Dashboard
                 </NavLink>
 
-                <NavLink to="/admin-orders" className="nav-link">
+                {/* ✅ NEW PRODUCTS LINK */}
+                <NavLink to="/admin/products" className="nav-link">
+                  Products
+                </NavLink>
+
+                <NavLink to="/admin/orders" className="nav-link">
                   Orders
                 </NavLink>
 
-                {/* ✅ NEW MESSAGES LINK */}
                 <NavLink to="/admin/messages" className="nav-link">
                   Messages
                 </NavLink>
@@ -188,21 +194,22 @@ export default function Navbar() {
         {/* MOBILE MENU */}
         {mobileOpen && (
           <div className="md:hidden bg-white shadow-lg rounded-b-2xl px-6 py-6 flex flex-col items-center gap-6 text-center">
+
             {isAdmin ? (
               <>
                 <NavLink to="/admin" onClick={closeMenu}>
                   Dashboard
                 </NavLink>
 
+                <NavLink to="/admin-products" onClick={closeMenu}>
+                  Products
+                </NavLink>
+
                 <NavLink to="/admin-orders" onClick={closeMenu}>
                   Orders
                 </NavLink>
 
-                {/* ✅ NEW MESSAGES LINK (MOBILE) */}
-                <NavLink
-                  to="/admin/messages"
-                  onClick={closeMenu}
-                >
+                <NavLink to="/admin/messages" onClick={closeMenu}>
                   Messages
                 </NavLink>
 
@@ -240,23 +247,14 @@ export default function Navbar() {
                 </NavLink>
 
                 {!user ? (
-                  <div className="w-full flex flex-col gap-3 pt-4 border-t">
-                    <NavLink
-                      to="/login"
-                      onClick={closeMenu}
-                      className="border border-caviro py-2 rounded-full"
-                    >
+                  <>
+                    <NavLink to="/login" onClick={closeMenu}>
                       Login
                     </NavLink>
-
-                    <NavLink
-                      to="/register"
-                      onClick={closeMenu}
-                      className="bg-caviro text-white py-2 rounded-full"
-                    >
+                    <NavLink to="/register" onClick={closeMenu}>
                       Register
                     </NavLink>
-                  </div>
+                  </>
                 ) : (
                   <button
                     onClick={handleLogout}

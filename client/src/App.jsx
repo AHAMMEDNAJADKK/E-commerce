@@ -9,11 +9,12 @@ import Contact from "./pages/Contact.jsx";
 import Cart from "./pages/Cart.jsx";
 import Orders from "./pages/Orders.jsx";
 
-import AdminDashboard from "./admin/AdminDashboard";
+import AdminDashboard from "./admin/AdminDashboard.jsx";
 import AdminAddProduct from "./admin/AdminAddProduct.jsx";
-import AdminOrders from "./admin/AdminOrders";
+import AdminOrders from "./admin/AdminOrders.jsx";
 import AdminLogin from "./admin/AdminLogin.jsx";
 import AdminContactMessages from "./admin/AdminContactMessages.jsx";
+import AdminProducts from "./admin/AdminProducts.jsx";
 
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -21,30 +22,60 @@ import CheckoutPage from "./pages/CheckoutPage.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import OrderPage from "./pages/OrderPage.jsx";
 
-import Footer from "./components/Footer/Footer";
+import Footer from "./components/Footer/Footer.jsx";
 import { useAuth } from "./context/AuthContext";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 
-/* 🔒 ADMIN ROUTE */
+/* ============================= */
+/* 🔒 ADMIN PROTECTED ROUTE */
+/* ============================= */
 const AdminRoute = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  if (user.role !== "admin") return <Navigate to="/" />;
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== "admin") return <Navigate to="/" replace />;
+
   return children;
 };
 
-/* 🔐 USER ROUTE */
+/* ============================= */
+/* 🔐 USER PROTECTED ROUTE */
+/* ============================= */
 const UserRoute = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  if (user.role !== "user") return <Navigate to="/" />;
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== "user") return <Navigate to="/" replace />;
+
   return children;
 };
 
-/* 🏠 ROLE-BASED HOME */
+/* ============================= */
+/* 🚫 PREVENT AUTH PAGES IF LOGGED */
+/* ============================= */
+const AuthRedirect = ({ children }) => {
+  const { user } = useAuth();
+
+  if (user?.role === "admin") return <Navigate to="/admin" replace />;
+  if (user?.role === "user") return <Navigate to="/" replace />;
+
+  return children;
+};
+
+/* ============================= */
+/* 🏠 ROLE BASED HOME */
+/* ============================= */
 const RoleHome = () => {
   const { user } = useAuth();
-  if (user?.role === "admin") return <AdminDashboard />;
+
+  if (user?.role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
   return <Home />;
 };
 
@@ -59,7 +90,7 @@ export default function App() {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           
-          {/* 🌐 HOME */}
+          {/* 🏠 HOME */}
           <Route
             path="/"
             element={
@@ -69,7 +100,7 @@ export default function App() {
             }
           />
 
-          {/* 🌍 PUBLIC */}
+          {/* 🌍 PUBLIC ROUTES */}
           <Route
             path="/about"
             element={
@@ -95,25 +126,29 @@ export default function App() {
             }
           />
 
-          {/* 🔑 AUTH */}
+          {/* 🔑 AUTH ROUTES */}
           <Route
             path="/login"
             element={
-              <PageWrapper>
-                <Login />
-              </PageWrapper>
+              <AuthRedirect>
+                <PageWrapper>
+                  <Login />
+                </PageWrapper>
+              </AuthRedirect>
             }
           />
           <Route
             path="/register"
             element={
-              <PageWrapper>
-                <Register />
-              </PageWrapper>
+              <AuthRedirect>
+                <PageWrapper>
+                  <Register />
+                </PageWrapper>
+              </AuthRedirect>
             }
           />
 
-          {/* 🧾 USER */}
+          {/* 👤 USER ROUTES */}
           <Route
             path="/orders"
             element={
@@ -128,37 +163,54 @@ export default function App() {
           <Route
             path="/checkout"
             element={
-              <PageWrapper>
-                <CheckoutPage />
-              </PageWrapper>
+              <UserRoute>
+                <PageWrapper>
+                  <CheckoutPage />
+                </PageWrapper>
+              </UserRoute>
             }
           />
 
           <Route
             path="/payment-success"
             element={
-              <PageWrapper>
-                <PaymentSuccess />
-              </PageWrapper>
+              <UserRoute>
+                <PageWrapper>
+                  <PaymentSuccess />
+                </PageWrapper>
+              </UserRoute>
             }
           />
 
           <Route
             path="/order/:id"
             element={
-              <PageWrapper>
-                <OrderPage />
-              </PageWrapper>
+              <UserRoute>
+                <PageWrapper>
+                  <OrderPage />
+                </PageWrapper>
+              </UserRoute>
             }
           />
 
-          {/* 👑 ADMIN */}
+          {/* 👑 ADMIN ROUTES */}
           <Route
             path="/admin"
             element={
               <AdminRoute>
                 <PageWrapper>
                   <AdminDashboard />
+                </PageWrapper>
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin/products"
+            element={
+              <AdminRoute>
+                <PageWrapper>
+                  <AdminProducts />
                 </PageWrapper>
               </AdminRoute>
             }
@@ -176,7 +228,7 @@ export default function App() {
           />
 
           <Route
-            path="/admin-orders"
+            path="/admin/orders"
             element={
               <AdminRoute>
                 <PageWrapper>
@@ -186,7 +238,6 @@ export default function App() {
             }
           />
 
-          {/* ✅ NEW ADMIN MESSAGES ROUTE */}
           <Route
             path="/admin/messages"
             element={
@@ -201,14 +252,16 @@ export default function App() {
           <Route
             path="/admin-login"
             element={
-              <PageWrapper>
-                <AdminLogin />
-              </PageWrapper>
+              <AuthRedirect>
+                <PageWrapper>
+                  <AdminLogin />
+                </PageWrapper>
+              </AuthRedirect>
             }
           />
 
           {/* ❌ FALLBACK */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
 

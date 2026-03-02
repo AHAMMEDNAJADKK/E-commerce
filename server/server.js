@@ -3,7 +3,6 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import path from "path";
 import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -11,31 +10,48 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 import { protect, adminOnly } from "./middleware/authMiddleware.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
-import contactRoutes from "./routes/contactRoutes.js"
-
 
 connectDB();
 
 const app = express();
 
+/* ============================= */
+/* 🔥 MIDDLEWARE */
+/* ============================= */
+
 app.use(cors());
 app.use(express.json());
 
-/* ✅ SERVE UPLOADS FIRST */
+/* 🚫 DISABLE CACHE (Fix 304 Issue) */
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
+/* ✅ SERVE UPLOADS */
 app.use("/uploads", express.static("uploads"));
+
+/* ============================= */
+/* 🔥 ROUTES */
+/* ============================= */
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payment", paymentRoutes);
-app.use("/api/contact",contactRoutes);
+app.use("/api/contact", contactRoutes);
+
+/* ============================= */
+/* 🔥 TEST ROUTES */
+/* ============================= */
 
 app.get("/", (req, res) => {
-  res.send("API Running");
+  res.send("API Running 🚀");
 });
 
 app.get("/api/test-user", protect, (req, res) => {
@@ -51,10 +67,15 @@ app.get("/api/test-admin", protect, adminOnly, (req, res) => {
   });
 });
 
-/* ✅ ERROR HANDLER LAST */
+/* ============================= */
+/* 🔥 ERROR HANDLERS */
+/* ============================= */
+
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`🔥 Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🔥 Server running on port ${PORT}`)
+);

@@ -5,14 +5,24 @@ const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
     try {
+      setLoading(true);
+
       const { data } = await axios.get("/api/products");
-      setProducts(Array.isArray(data) ? data : []);
+
+      console.log("API Response:", data);
+
+      // ✅ FIX HERE
+      setProducts(data.products || []);
+
     } catch (error) {
       console.error("Failed to fetch products:", error);
       setProducts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -22,7 +32,7 @@ export const ProductProvider = ({ children }) => {
 
   return (
     <ProductContext.Provider
-      value={{ products, setProducts, fetchProducts }}
+      value={{ products, loading, fetchProducts }}
     >
       {children}
     </ProductContext.Provider>
