@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -8,7 +9,21 @@ export default function AdminProducts() {
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [brand, setBrand] = useState("");
+  const [image, setImage] = useState(null);
+
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${userInfo.token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  };
 
   const fetchProducts = async () => {
     try {
@@ -26,9 +41,8 @@ export default function AdminProducts() {
       setProducts(data.products);
       setPage(data.page);
       setPages(data.pages);
-
     } catch (error) {
-      console.error(error);
+      toast.error("Failed to load products");
     } finally {
       setLoading(false);
     }
@@ -38,11 +52,105 @@ export default function AdminProducts() {
     fetchProducts();
   }, [page, keyword]);
 
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setName(product.name);
+    setPrice(product.price);
+    setBrand(product.brand);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("brand", brand);
+    if (image) formData.append("image", image);
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/products/${editingProduct._id}`,
+        formData,
+        config
+      );
+
+      toast.success("Product updated successfully");
+
+      setEditingProduct(null);
+      setName("");
+      setPrice("");
+      setBrand("");
+      setImage(null);
+
+      fetchProducts();
+    } catch (error) {
+      toast.error("Update failed");
+    }
+  };
+
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">
-        Manage Products
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Manage Products</h1>
+
+      {/* ================= EDIT FORM ================= */}
+      {editingProduct && (
+        <div className="bg-white p-6 rounded-2xl shadow-xl mb-8">
+          <h2 className="text-xl font-semibold mb-4">Edit Product</h2>
+
+          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Product Name"
+              className="border p-3 rounded-lg"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+
+            <input
+              type="number"
+              placeholder="Price"
+              className="border p-3 rounded-lg"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Brand"
+              className="border p-3 rounded-lg"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              required
+            />
+
+            <input
+              type="file"
+              className="border p-3 rounded-lg col-span-2"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
+
+            <div className="col-span-2 flex gap-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-3 rounded-lg w-full"
+              >
+                Update Product
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEditingProduct(null)}
+                className="bg-gray-400 text-white px-4 py-3 rounded-lg w-full"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* 🔍 Search */}
       <div className="flex justify-between mb-6">
@@ -58,12 +166,10 @@ export default function AdminProducts() {
         />
       </div>
 
-      {/* 📦 Table */}
+      {/* ================= TABLE ================= */}
       <div className="bg-white rounded-2xl shadow-xl overflow-x-auto">
         {loading ? (
-          <div className="p-8 text-center">
-            Loading products...
-          </div>
+          <div className="p-8 text-center">Loading products...</div>
         ) : products.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             No products found
@@ -76,17 +182,13 @@ export default function AdminProducts() {
                 <th className="p-4 text-left">Name</th>
                 <th className="p-4 text-left">Brand</th>
                 <th className="p-4 text-left">Price</th>
-                <th className="p-4 text-left">Stock</th>
                 <th className="p-4 text-left">Action</th>
               </tr>
             </thead>
 
             <tbody>
               {products.map((product) => (
-                <tr
-                  key={product._id}
-                  className="border-b hover:bg-gray-50"
-                >
+                <tr key={product._id} className="border-b hover:bg-gray-50">
                   <td className="p-4">
                     <img
                       src={`http://localhost:5000${product.image}`}
@@ -95,34 +197,21 @@ export default function AdminProducts() {
                     />
                   </td>
 
-                  <td className="p-4 font-semibold">
-                    {product.name}
-                  </td>
+                  <td className="p-4 font-semibold">{product.name}</td>
+                  <td className="p-4 capitalize">{product.brand}</td>
+                  <td className="p-4 font-bold">₹{product.price}</td>
 
-                  <td className="p-4 capitalize">
-                    {product.brand}
-                  </td>
+                  <td className="p-4 space-x-2">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Edit
+                    </button>
 
-                  <td className="p-4 font-bold">
-                    ₹{product.price}
-                  </td>
-
-                  <td className="p-4">
-                    {product.countInStock < 5 ? (
-                      <span className="text-red-600 font-semibold">
-                        {product.countInStock} (Low)
-                      </span>
-                    ) : (
-                      <span className="text-green-600 font-semibold">
-                        {product.countInStock}
-                      </span>
-                    )}
-                  </td>
-
-                  <td className="p-4">
                     <button
                       onClick={async () => {
-                        if (window.confirm("Delete product?")) {
+                        try {
                           await axios.delete(
                             `http://localhost:5000/api/products/${product._id}`,
                             {
@@ -131,10 +220,14 @@ export default function AdminProducts() {
                               },
                             }
                           );
+
+                          toast.success("Product deleted successfully");
                           fetchProducts();
+                        } catch (error) {
+                          toast.error("Delete failed");
                         }
                       }}
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg"
                     >
                       Delete
                     </button>
@@ -153,9 +246,7 @@ export default function AdminProducts() {
             key={x + 1}
             onClick={() => setPage(x + 1)}
             className={`px-4 py-2 rounded-lg ${
-              page === x + 1
-                ? "bg-black text-white"
-                : "bg-white border"
+              page === x + 1 ? "bg-black text-white" : "bg-white border"
             }`}
           >
             {x + 1}

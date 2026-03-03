@@ -1,45 +1,89 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
 
   const fetchOrders = async () => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
-    const { data } = await axios.get(
-      "http://localhost:5000/api/orders",
-      {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      }
-    );
+      const { data } = await axios.get(
+        "http://localhost:5000/api/orders",
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
 
-    setOrders(data);
+      setOrders(data);
+    } catch (error) {
+      toast.error("Failed to fetch orders");
+    }
   };
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  /* ✅ WHATSAPP FUNCTION FIXED */
+  const sendWhatsAppMessage = (order) => {
+    console.log("PHONE:", order.user?.phone);
+    if (!order.user?.phone) {
+      toast.error("User phone number not available");
+      return;
+    }
+
+    // Remove + if exists
+    let phone = order.user.phone.replace("+", "");
+
+    const message = `
+Hello ${order.user.name},
+
+🎉 Your order has been successfully delivered!
+
+🧾 Order ID: ${order._id}
+💰 Total: ₹${order.totalPrice}
+
+Thank you for shopping with us ❤️
+`;
+
+    const whatsappURL = `https://wa.me/${phone}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    window.open(whatsappURL, "_blank");
+  };
+
   /* 🔥 STATUS UPDATE FUNCTION */
-  const updateStatus = async (id, type) => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const updateStatus = async (order, type) => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
-    if (type === "pending") return;
+      if (type === "pending") return;
 
-    await axios.put(
-      `http://localhost:5000/api/orders/${id}/${type}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
+      await axios.put(
+        `http://localhost:5000/api/orders/${order._id}/${type}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+
+      toast.success("Order updated successfully");
+
+      if (type === "deliver") {
+        sendWhatsAppMessage(order);
       }
-    );
 
-    fetchOrders();
+      fetchOrders();
+    } catch (error) {
+      toast.error("Failed to update order");
+    }
   };
 
   return (
@@ -62,9 +106,7 @@ export default function AdminOrders() {
               <tr key={order._id} className="border-b hover:bg-gray-50">
                 <td className="p-4">{order.user?.email}</td>
 
-                <td className="p-4 font-bold">
-                  ₹{order.totalPrice}
-                </td>
+                <td className="p-4 font-bold">₹{order.totalPrice}</td>
 
                 <td className="p-4">
                   <select
@@ -76,7 +118,7 @@ export default function AdminOrders() {
                         : "pending"
                     }
                     onChange={(e) =>
-                      updateStatus(order._id, e.target.value)
+                      updateStatus(order, e.target.value)
                     }
                     className="border px-3 py-1 rounded-lg"
                   >

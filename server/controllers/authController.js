@@ -12,9 +12,9 @@ const generateToken = (id) => {
 // 🔹 REGISTER USER
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -30,6 +30,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      phone,
       role: "user",
     });
 
@@ -37,9 +38,11 @@ export const registerUser = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       role: user.role,
       token: generateToken(user._id),
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -66,6 +69,7 @@ export const loginUser = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone:user.phone,
       role: user.role,
       token: generateToken(user._id),
     });

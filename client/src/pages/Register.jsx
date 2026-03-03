@@ -1,19 +1,41 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    await register(name, email, password);
-    navigate("/");
+
+    if (!formData.name || !formData.email || !formData.password || !formData.phone) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    try {
+      await register(formData);
+      toast.success("Registration successful 🎉");
+      navigate("/");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Registration failed");
+    }
   };
 
   return (
@@ -24,36 +46,47 @@ export default function Register() {
         </h2>
 
         <form onSubmit={submitHandler} className="space-y-5">
+
           <input
             type="text"
-            required
+            name="name"
             placeholder="Full Name"
             className="input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={handleChange}
           />
 
           <input
             type="email"
-            required
+            name="email"
             placeholder="Email Address"
             className="input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone Number (91xxxxxxxxxx)"
+            className="input"
+            value={formData.phone}
+            onChange={handleChange}
           />
 
           <input
             type="password"
-            required
+            name="password"
             placeholder="Password"
             className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
           />
 
           <button className="w-full bg-caviro text-white py-3 rounded-full font-semibold hover:opacity-90 transition">
             Register
           </button>
+
         </form>
       </div>
     </div>

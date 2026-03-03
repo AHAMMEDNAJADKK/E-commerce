@@ -25,6 +25,8 @@ import OrderPage from "./pages/OrderPage.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import { useAuth } from "./context/AuthContext";
 import ScrollToTop from "./components/ScrollToTop.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 /* ============================= */
 /* 🔒 ADMIN PROTECTED ROUTE */
@@ -84,12 +86,15 @@ export default function App() {
 
   return (
     <>
+      <>
+        {/* your routes */}
+        <ToastContainer position="top-right" autoClose={3000} />
+      </>
       <Navbar />
       <ScrollToTop />
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          
           {/* 🏠 HOME */}
           <Route
             path="/"
