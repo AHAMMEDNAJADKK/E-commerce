@@ -18,33 +18,33 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   const addToCart = (product, showMessage = true) => {
-    const exists = cartItems.find(
-      (item) => item._id === product._id
+  const exists = cartItems.find(
+    (item) =>
+      item._id === product._id &&
+      item.size === product.size
+  );
+
+  if (exists) {
+    setCartItems(
+      cartItems.map((item) =>
+        item._id === product._id &&
+        item.size === product.size
+          ? { ...item, qty: item.qty + 1 }
+          : item
+      )
     );
 
-    if (exists) {
-      setCartItems(
-        cartItems.map((item) =>
-          item._id === product._id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        )
-      );
-
-      if (showMessage) {
-        showToast("Product quantity updated in cart 🛒");
-      }
-    } else {
-      setCartItems([
-        ...cartItems,
-        { ...product, qty: 1 }
-      ]);
-
-      if (showMessage) {
-        showToast("Product added to cart successfully 🛍️");
-      }
+    if (showMessage) {
+      showToast("Product quantity updated in cart 🛒");
     }
-  };
+  } else {
+    setCartItems([...cartItems, product]);
+
+    if (showMessage) {
+      showToast("Product added to cart successfully 🛍️");
+    }
+  }
+};
 
   const removeFromCart = (id) => {
     setCartItems(

@@ -152,7 +152,7 @@ export default function AdminDashboard() {
         <Card title="Customers" value={Object.keys(customerMap).length} />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Bar Chart */}
         <div className="bg-white rounded-2xl shadow-xl p-6 overflow-hidden">
           <h2 className="text-xl font-semibold mb-6">Orders Overview</h2>

@@ -26,6 +26,12 @@ const productSchema = new mongoose.Schema(
     image: {
       type: String,
     },
+    size:{
+      type:String,
+    },
+    description: {
+      type:String,
+    },
     isNewArrival: {
       type: Boolean,
       default: false,

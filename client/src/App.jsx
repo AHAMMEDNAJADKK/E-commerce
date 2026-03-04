@@ -21,6 +21,7 @@ import Register from "./pages/Register.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import OrderPage from "./pages/OrderPage.jsx";
+import ProductDetails from "./pages/ProductDetails.jsx";
 
 import Footer from "./components/Footer/Footer.jsx";
 import { useAuth } from "./context/AuthContext";
@@ -197,6 +198,7 @@ export default function App() {
               </UserRoute>
             }
           />
+          <Route path="/product/:id" element={<ProductDetails/>}/>
 
           {/* 👑 ADMIN ROUTES */}
           <Route

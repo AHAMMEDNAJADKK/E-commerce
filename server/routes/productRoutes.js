@@ -8,11 +8,12 @@ import {
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
+import { getProductById } from "../controllers/productController.js";
 
 const router = express.Router();
 
 router.get("/", getProducts);
-
+router.get("/:id",getProductById)
 router.post(
   "/",
   protect,

@@ -16,6 +16,10 @@ export default function AdminProducts() {
   const [brand, setBrand] = useState("");
   const [image, setImage] = useState(null);
 
+  // ✅ NEW DELETE MODAL STATES
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
   const config = {
@@ -86,6 +90,33 @@ export default function AdminProducts() {
       fetchProducts();
     } catch (error) {
       toast.error("Update failed");
+    }
+  };
+
+  // ✅ OPEN MODAL
+  const openDeleteModal = (product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  // ✅ CONFIRM DELETE
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/products/${productToDelete._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+
+      toast.success("Product deleted successfully");
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+      fetchProducts();
+    } catch (error) {
+      toast.error("Delete failed");
     }
   };
 
@@ -171,9 +202,7 @@ export default function AdminProducts() {
         {loading ? (
           <div className="p-8 text-center">Loading products...</div>
         ) : products.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No products found
-          </div>
+          <div className="p-8 text-center text-gray-500">No products found</div>
         ) : (
           <table className="w-full">
             <thead className="bg-gray-900 text-white">
@@ -210,23 +239,7 @@ export default function AdminProducts() {
                     </button>
 
                     <button
-                      onClick={async () => {
-                        try {
-                          await axios.delete(
-                            `http://localhost:5000/api/products/${product._id}`,
-                            {
-                              headers: {
-                                Authorization: `Bearer ${userInfo.token}`,
-                              },
-                            }
-                          );
-
-                          toast.success("Product deleted successfully");
-                          fetchProducts();
-                        } catch (error) {
-                          toast.error("Delete failed");
-                        }
-                      }}
+                      onClick={() => openDeleteModal(product)}
                       className="bg-red-600 text-white px-4 py-2 rounded-lg"
                     >
                       Delete
@@ -238,6 +251,41 @@ export default function AdminProducts() {
           </table>
         )}
       </div>
+
+      {/* ✅ DELETE MODAL */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl w-96 text-center">
+            <h2 className="text-xl font-semibold text-red-600 mb-4">
+              Confirm Deletion
+            </h2>
+
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">
+                {productToDelete?.name}
+              </span>
+              ?
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="bg-gray-400 text-white px-4 py-2 rounded-lg w-full"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg w-full"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 📄 Pagination */}
       <div className="flex justify-center mt-6 gap-2">

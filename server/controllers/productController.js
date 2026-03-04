@@ -43,6 +43,8 @@ export const createProduct = async (req, res) => {
     price,
     brand, // ✅ ADDED
     quality,
+    size,
+    description,
     isNewArrival,
     isTrending,
   } = req.body;
@@ -52,6 +54,8 @@ export const createProduct = async (req, res) => {
     price,
     brand: brand?.trim().toLowerCase(), // ✅ IMPORTANT FIX
     quality: quality?.trim(),
+    size,
+    description,
     isNewArrival,
     isTrending,
     image: req.file ? `/uploads/${req.file.filename}` : "",
@@ -91,6 +95,19 @@ export const updateProduct = async (req, res) => {
 
   const updatedProduct = await product.save();
   res.json(updatedProduct);
+};
+
+// @desc Get single product
+// @route GET /api/products/:id
+// @access Public
+export const getProductById = async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  res.json(product);
 };
 
 // @desc    Delete product
