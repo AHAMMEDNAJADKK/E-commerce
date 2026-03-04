@@ -6,17 +6,25 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate(); // ✅ added
+  const [loading, setLoading] = useState(true); // ✅ Added loading state
+  const navigate = useNavigate();
 
-  // Load user from localStorage
+  /* =========================
+     🔄 Load user from localStorage
+  ========================== */
   useEffect(() => {
     const storedUser = localStorage.getItem("userInfo");
+
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+
+    setLoading(false); // ✅ Stop loading after checking localStorage
   }, []);
 
-  // LOGIN
+  /* =========================
+     🔐 LOGIN
+  ========================== */
   const login = async (formData) => {
     try {
       const { data } = await axios.post(
@@ -26,6 +34,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("userInfo", JSON.stringify(data));
       setUser(data);
+
       return data;
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
@@ -33,7 +42,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // REGISTER
+  /* =========================
+     📝 REGISTER
+  ========================== */
   const register = async (formData) => {
     try {
       const { data } = await axios.post(
@@ -43,6 +54,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("userInfo", JSON.stringify(data));
       setUser(data);
+
       return data;
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
@@ -50,15 +62,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔥 LOGOUT FIXED
+  /* =========================
+     🚪 LOGOUT
+  ========================== */
   const logout = () => {
     localStorage.removeItem("userInfo");
     setUser(null);
-    navigate("/");   // ✅ Always go to Home
+    navigate("/");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, login, register, logout, loading }} // ✅ loading added here
+    >
       {children}
     </AuthContext.Provider>
   );

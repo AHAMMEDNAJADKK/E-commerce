@@ -31,14 +31,11 @@ export default function AdminDashboard() {
 
     const fetchOrders = async () => {
       try {
-        const { data } = await axios.get(
-          "http://localhost:5000/api/orders",
-          {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-            },
-          }
-        );
+        const { data } = await axios.get("http://localhost:5000/api/orders", {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        });
 
         setOrders(data);
       } catch (error) {
@@ -67,15 +64,12 @@ export default function AdminDashboard() {
 
   const totalOrders = filteredOrders.length;
 
-  const totalRevenue = filteredOrders.reduce(
-    (sum, o) => sum + o.totalPrice,
-    0
-  );
+  const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
   const today = new Date().toISOString().slice(0, 10);
 
   const todayOrders = filteredOrders.filter(
-    (o) => o.createdAt?.slice(0, 10) === today
+    (o) => o.createdAt?.slice(0, 10) === today,
   );
 
   /* ================= BAR CHART ================= */
@@ -151,36 +145,46 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPI */}
-      <div className="grid md:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <Card title="Total Orders" value={totalOrders} />
         <Card title="Today's Orders" value={todayOrders.length} />
         <Card title="Revenue" value={`₹${totalRevenue}`} />
         <Card title="Customers" value={Object.keys(customerMap).length} />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Bar Chart */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-semibold mb-6">
-            Orders Overview
-          </h2>
+        <div className="bg-white rounded-2xl shadow-xl p-6 overflow-hidden">
+          <h2 className="text-xl font-semibold mb-6">Orders Overview</h2>
 
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="orders" fill="#111827" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full h-[350px]">
+            <ResponsiveContainer>
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 20, left: 0, bottom: 60 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+
+                <XAxis
+                  dataKey="date"
+                  interval="preserveStartEnd"
+                  minTickGap={20}
+                  tick={{ fontSize: 11 }}
+                />
+
+                <YAxis tick={{ fontSize: 11 }} />
+
+                <Tooltip />
+
+                <Bar dataKey="orders" fill="#111827" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Top Customers */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-semibold mb-6">
-            Top Customers
-          </h2>
+          <h2 className="text-xl font-semibold mb-6">Top Customers</h2>
 
           {topCustomers.length === 0 ? (
             <p>No customers yet</p>
@@ -205,38 +209,40 @@ export default function AdminDashboard() {
         </div>
 
         {/* Donut Chart */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-semibold mb-6">
-            Top Ordered Products
-          </h2>
+        <div className="bg-white rounded-2xl shadow-xl p-6 overflow-hidden">
+          <h2 className="text-xl font-semibold mb-6">Top Ordered Products</h2>
 
           {topProducts.length === 0 ? (
             <p>No product data</p>
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={topProducts}
-                  dataKey="quantity"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={100}
-                  paddingAngle={3}
-                  cornerRadius={8}
-                >
-                  {topProducts.map((entry, index) => (
-                    <Cell
-                      key={index}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="w-full h-[350px]">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={topProducts}
+                    dataKey="quantity"
+                    nameKey="name"
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={3}
+                  >
+                    {topProducts.map((entry, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+
+                  <Tooltip />
+
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
       </div>

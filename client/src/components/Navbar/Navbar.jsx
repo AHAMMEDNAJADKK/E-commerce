@@ -201,11 +201,11 @@ export default function Navbar() {
                   Dashboard
                 </NavLink>
 
-                <NavLink to="/admin-products" onClick={closeMenu}>
+                <NavLink to="/admin/products" onClick={closeMenu}>
                   Products
                 </NavLink>
 
-                <NavLink to="/admin-orders" onClick={closeMenu}>
+                <NavLink to="/admin/orders" onClick={closeMenu}>
                   Orders
                 </NavLink>
 
