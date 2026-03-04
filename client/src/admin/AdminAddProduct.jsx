@@ -64,7 +64,7 @@ export default function AdminAddProduct() {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
-        navigate("/admin/products"); // ✅ redirect
+        navigate("/admin/products");
       }, 1500);
 
     } catch (error) {
@@ -76,7 +76,7 @@ export default function AdminAddProduct() {
   return (
     <div className="min-h-screen bg-gray-50 px-6 md:px-20 py-14">
       {showToast && (
-        <div className="fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded shadow">
+        <div className="fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
           <FaCheckCircle /> Product saved successfully
         </div>
       )}
@@ -87,24 +87,93 @@ export default function AdminAddProduct() {
         </h2>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
-          <input name="name" placeholder="Product Name" value={form.name} onChange={handleChange} className="admin-input-simple" required />
-          <input name="brand" placeholder="Brand" value={form.brand} onChange={handleChange} className="admin-input-simple" required />
-          <input name="price" type="number" placeholder="Price" value={form.price} onChange={handleChange} className="admin-input-simple" required />
-          <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange} rows={4} className="admin-input-simple resize-none" />
-          <input name="size" placeholder="Available sizes" value={form.size} onChange={handleChange} className="admin-input-simple" />
+          
+          <input
+            name="name"
+            placeholder="Product Name"
+            value={form.name}
+            onChange={handleChange}
+            className="admin-input-simple"
+            required
+          />
+
+          <input
+            name="brand"
+            placeholder="Brand"
+            value={form.brand}
+            onChange={handleChange}
+            className="admin-input-simple"
+            required
+          />
+
+          <input
+            name="price"
+            type="number"
+            placeholder="Price"
+            value={form.price}
+            onChange={handleChange}
+            className="admin-input-simple"
+            required
+          />
+
+          {/* ✅ QUALITY SELECT ADDED */}
+          <select
+            name="quality"
+            value={form.quality}
+            onChange={handleChange}
+            className="admin-input-simple"
+            required
+          >
+            <option value="10A">10A Quality</option>
+            <option value="7A">7A Quality</option>
+          </select>
+
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
+            rows={4}
+            className="admin-input-simple resize-none"
+          />
+
+          <input
+            name="size"
+            placeholder="Available sizes"
+            value={form.size}
+            onChange={handleChange}
+            className="admin-input-simple"
+          />
 
           <div className="flex gap-6">
             <label className="flex gap-2 items-center">
-              <input type="checkbox" name="isNewArrival" checked={form.isNewArrival} onChange={handleChange} />
+              <input
+                type="checkbox"
+                name="isNewArrival"
+                checked={form.isNewArrival}
+                onChange={handleChange}
+              />
               New Arrival
             </label>
+
             <label className="flex gap-2 items-center">
-              <input type="checkbox" name="isTrending" checked={form.isTrending} onChange={handleChange} />
+              <input
+                type="checkbox"
+                name="isTrending"
+                checked={form.isTrending}
+                onChange={handleChange}
+              />
               Trending
             </label>
           </div>
 
-          <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} className="w-full border p-2 rounded" required />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+            className="w-full border p-2 rounded"
+            required
+          />
 
           <button type="submit" className="admin-submit-btn w-full">
             Add Product

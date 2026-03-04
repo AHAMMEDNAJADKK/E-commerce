@@ -1,4 +1,4 @@
-import Product from "../models/productModel.js";
+import Product from "../models/Productmodel.js";
 
 // @desc    Get products (Public + Admin with search & pagination)
 // @route   GET /api/products

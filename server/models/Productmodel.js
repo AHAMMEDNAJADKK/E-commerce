@@ -21,6 +21,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       enum: ["10A", "7A"],
       required: true,
+      enum:["7A","10A"],
     },
     image: {
       type: String,
