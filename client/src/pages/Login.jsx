@@ -39,13 +39,11 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-8">
-        
         <h2 className="text-3xl font-bold text-center text-caviro mb-6">
           Welcome Back
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* EMAIL */}
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -63,9 +61,7 @@ export default function Login() {
 
           {/* PASSWORD */}
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium mb-1">Password</label>
             <input
               type="password"
               name="password"
@@ -95,7 +91,14 @@ export default function Login() {
             Register here
           </Link>
         </p>
-
+        <div className="text-center mt-2">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-caviro hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -22,7 +22,8 @@ import CheckoutPage from "./pages/CheckoutPage.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import OrderPage from "./pages/OrderPage.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
-
+import ForgotPassword from "./pages/ForgetPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import { useAuth } from "./context/AuthContext";
 import ScrollToTop from "./components/ScrollToTop.jsx";
@@ -153,6 +154,8 @@ export default function App() {
               </AuthRedirect>
             }
           />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* 👤 USER ROUTES */}
           <Route
@@ -198,7 +201,7 @@ export default function App() {
               </UserRoute>
             }
           />
-          <Route path="/product/:id" element={<ProductDetails/>}/>
+          <Route path="/product/:id" element={<ProductDetails />} />
 
           {/* 👑 ADMIN ROUTES */}
           <Route
