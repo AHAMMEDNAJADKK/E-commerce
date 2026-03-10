@@ -3,6 +3,43 @@ import generateToken from "../utils/generateToken.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
+/* =====================================================
+   REGISTER USER  ✅ FIXED
+===================================================== */
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password, phone } = req.body;
+
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const userExists = await User.findOne({ email: email.toLowerCase() });
+
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      phone,
+    });
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      token: generateToken(user._id),
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 /* =====================================================
    LOGIN USER
@@ -11,16 +48,16 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email" });
     }
 
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid password" });
     }
 
     if (user.isBlocked) {
@@ -31,6 +68,7 @@ export const loginUser = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       role: user.role,
       isBlocked: user.isBlocked,
       token: generateToken(user._id),
@@ -41,12 +79,12 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
 /* =====================================================
    GET USER PROFILE
 ===================================================== */
 export const getUserProfile = async (req, res) => {
   try {
+
     const user = await User.findById(req.user._id).select("-password");
 
     if (!user) {
@@ -60,13 +98,14 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-
 /* =====================================================
    GET ALL USERS (ADMIN)
 ===================================================== */
 export const getAllUsers = async (req, res) => {
   try {
+
     const users = await User.find({}).select("-password");
+
     res.json(users);
 
   } catch (error) {
@@ -74,12 +113,12 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-
 /* =====================================================
    DELETE USER (ADMIN)
 ===================================================== */
 export const deleteUser = async (req, res) => {
   try {
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -95,12 +134,12 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
 /* =====================================================
-   BLOCK / UNBLOCK USER (ADMIN)
+   BLOCK / UNBLOCK USER
 ===================================================== */
 export const blockUser = async (req, res) => {
   try {
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -108,6 +147,7 @@ export const blockUser = async (req, res) => {
     }
 
     user.isBlocked = !user.isBlocked;
+
     await user.save({ validateBeforeSave: false });
 
     res.json({
@@ -121,12 +161,12 @@ export const blockUser = async (req, res) => {
   }
 };
 
-
 /* =====================================================
-   PROMOTE USER TO ADMIN
+   MAKE ADMIN
 ===================================================== */
 export const makeAdmin = async (req, res) => {
   try {
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -134,6 +174,7 @@ export const makeAdmin = async (req, res) => {
     }
 
     user.role = "admin";
+
     await user.save({ validateBeforeSave: false });
 
     res.json({ message: "User promoted to admin successfully" });
@@ -143,19 +184,18 @@ export const makeAdmin = async (req, res) => {
   }
 };
 
-
 /* =====================================================
-   FORGOT PASSWORD  ✅ FIXED
+   FORGOT PASSWORD
 ===================================================== */
 export const forgotPassword = async (req, res) => {
   try {
+
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate reset token
     const resetToken = crypto.randomBytes(20).toString("hex");
 
     const hashedToken = crypto
@@ -165,7 +205,6 @@ export const forgotPassword = async (req, res) => {
 
     const resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
-    // 🔥 IMPORTANT: Use updateOne instead of save()
     await User.updateOne(
       { _id: user._id },
       {
@@ -190,29 +229,28 @@ You requested a password reset.
 Click the link below:
 ${resetUrl}
 
-This link will expire in 15 minutes.
+This link expires in 15 minutes.
 `;
 
     await transporter.sendMail({
       to: user.email,
-      subject: "Password Reset - Caviro",
+      subject: "Password Reset",
       text: message,
     });
 
     res.json({ message: "Reset link sent to email" });
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Email could not be sent" });
   }
 };
 
-
 /* =====================================================
-   RESET PASSWORD  ✅ FIXED
+   RESET PASSWORD
 ===================================================== */
 export const resetPassword = async (req, res) => {
   try {
+
     const hashedToken = crypto
       .createHash("sha256")
       .update(req.params.token)
@@ -231,7 +269,6 @@ export const resetPassword = async (req, res) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
-    // 🔥 Skip validation to avoid phone required error
     await user.save({ validateBeforeSave: false });
 
     res.json({ message: "Password reset successful" });

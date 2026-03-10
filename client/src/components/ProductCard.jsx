@@ -1,17 +1,15 @@
-import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { getImageUrl } from "../utils/imageHelper";
 
 export default function ProductCard({ product }) {
-  const { addToCart } = useCart();
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   const handleAddToCart = (e) => {
-    e.stopPropagation(); // prevent card click redirect
+    e.stopPropagation();
 
     if (!user) {
       showToast("Please login or register to add products to cart", "error");
@@ -19,15 +17,14 @@ export default function ProductCard({ product }) {
       return;
     }
 
-    addToCart(product, false);
-    showToast("Product added to cart successfully 🛒", "success");
-    navigate("/cart");
+    // Open product details page
+    navigate(`/product/${product._id}`);
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-4 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
 
-      {/* CLICKABLE IMAGE + NAME */}
+      {/* IMAGE + NAME */}
       <Link to={`/product/${product._id}`}>
         <div className="relative overflow-hidden rounded-xl">
           <img
@@ -37,8 +34,9 @@ export default function ProductCard({ product }) {
           />
 
           <span
-            className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full text-white
-              ${product.quality === "10A" ? "bg-caviro" : "bg-[#4f7c2f]"}`}
+            className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full text-white ${
+              product.quality === "10A" ? "bg-caviro" : "bg-[#4f7c2f]"
+            }`}
           >
             {product.quality} Quality
           </span>
@@ -63,6 +61,7 @@ export default function ProductCard({ product }) {
           Add to Cart
         </button>
       </div>
+
     </div>
   );
 }

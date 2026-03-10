@@ -6,36 +6,40 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     brand: {
       type: String,
-      required:true,
+      required: true,
     },
+
     price: {
       type: Number,
       required: true,
     },
+
     description: {
       type: String,
     },
+
     quality: {
       type: String,
-      enum: ["10A", "7A"],
+      enum: ["7A", "10A"],
       required: true,
-      enum:["7A","10A"],
     },
+
     image: {
       type: String,
     },
-    size:{
-      type:String,
+
+    size: {
+      type: String,
     },
-    description: {
-      type:String,
-    },
+
     isNewArrival: {
       type: Boolean,
       default: false,
     },
+
     isTrending: {
       type: Boolean,
       default: false,
