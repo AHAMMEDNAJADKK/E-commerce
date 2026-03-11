@@ -22,7 +22,7 @@ export default function ForgotPassword() {
       setMessage("");
 
       const { data } = await axios.post(
-        "http://localhost:5000/api/users/forgot-password",
+        "https://caviro-backend.onrender.com/api/users/forgot-password",
         { email }
       );
 

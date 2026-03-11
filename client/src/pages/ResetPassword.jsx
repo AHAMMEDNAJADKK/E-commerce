@@ -16,7 +16,7 @@ export default function ResetPassword() {
       setLoading(true);
 
       await axios.put(
-        `http://localhost:5000/api/users/reset-password/${token}`,
+        `https://caviro-backend.onrender.com/api/users/reset-password/${token}`,
         { password }
       );
 

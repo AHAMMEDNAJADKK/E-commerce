@@ -10,7 +10,7 @@ export default function AdminOrders() {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
       const { data } = await axios.get(
-        "http://localhost:5000/api/orders",
+        "https://caviro-backend.onrender.com/api/orders",
         {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
@@ -65,7 +65,7 @@ Thank you for shopping with us ❤️
       if (type === "pending") return;
 
       await axios.put(
-        `http://localhost:5000/api/orders/${order._id}/${type}`,
+        `https://caviro-backend.onrender.com/api/orders/${order._id}/${type}`,
         {},
         {
           headers: {

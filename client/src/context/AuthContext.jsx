@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (formData) => {
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "https://caviro-backend.onrender.com/api/auth/login",
         formData
       );
 
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "https://caviro-backend.onrender.com/api/auth/register",
         formData
       );
 

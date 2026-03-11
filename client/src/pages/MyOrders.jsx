@@ -11,7 +11,7 @@ export default function MyOrders() {
 
   const fetchOrders = async () => {
     const { data } = await axios.get(
-      "http://localhost:5000/api/orders/myorders",
+      "https://caviro-backend.onrender.com/api/orders/myorders",
       {
         headers: {
           Authorization: `Bearer ${userInfo.token}`,
