@@ -4,5 +4,5 @@ export const getImageUrl = (imagePath) => {
   // if already full url
   if (imagePath.startsWith("http")) return imagePath;
 
-  return `http://localhost:5000${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+  return `https://caviro-backend.onrender.com${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 };

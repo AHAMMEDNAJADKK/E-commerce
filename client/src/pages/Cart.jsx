@@ -65,7 +65,7 @@ export default function Cart() {
           };
 
           await axios.post(
-            "http://localhost:5000/api/orders", // ✅ Ensure backend port
+            "https://caviro-backend.onrender.com/api/orders", // ✅ Ensure backend port
             orderData,
             {
               headers: {

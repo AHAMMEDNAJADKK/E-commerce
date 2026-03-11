@@ -52,7 +52,7 @@ export default function AdminAddProduct() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/products",
+        "https://caviro-backend.onrender.com/api/products",
         formData,
         {
           headers: {

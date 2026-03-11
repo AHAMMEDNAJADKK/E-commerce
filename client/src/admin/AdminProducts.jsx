@@ -34,7 +34,7 @@ export default function AdminProducts() {
       setLoading(true);
 
       const { data } = await axios.get(
-        `http://localhost:5000/api/products?page=${page}&keyword=${keyword}`,
+        `https://caviro-backend.onrender.com/api/products?page=${page}&keyword=${keyword}`,
         {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
@@ -74,7 +74,7 @@ export default function AdminProducts() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/products/${editingProduct._id}`,
+        `https://caviro-backend.onrender.com/api/products/${editingProduct._id}`,
         formData,
         config
       );
@@ -103,7 +103,7 @@ export default function AdminProducts() {
   const confirmDelete = async () => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/products/${productToDelete._id}`,
+        `https://caviro-backend.onrender.com/api/products/${productToDelete._id}`,
         {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
@@ -220,7 +220,7 @@ export default function AdminProducts() {
                 <tr key={product._id} className="border-b hover:bg-gray-50">
                   <td className="p-4">
                     <img
-                      src={`http://localhost:5000${product.image}`}
+                      src={`https://caviro-backend.onrender.com${product.image}`}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded-lg"
                     />

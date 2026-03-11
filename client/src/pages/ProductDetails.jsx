@@ -17,7 +17,7 @@ export default function ProductDetails() {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/products/${id}`
+          `https://caviro-backend.onrender.com/api/products/${id}`
         );
         setProduct(data);
       } catch (error) {
@@ -67,7 +67,7 @@ export default function ProductDetails() {
         {/* IMAGE */}
         <div>
           <img
-            src={`http://localhost:5000${product.image}`}
+            src={`https://caviro-backend.onrender.com${product.image}`}
             alt={product.name}
             className="w-full h-[450px] object-cover rounded-xl"
           />

@@ -31,7 +31,7 @@ export default function AdminDashboard() {
 
     const fetchOrders = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/orders", {
+        const { data } = await axios.get("https://caviro-backend.onrender.com/api/orders", {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
           },
