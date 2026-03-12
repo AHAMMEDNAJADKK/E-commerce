@@ -16,7 +16,7 @@ export default function ResetPassword() {
       setLoading(true);
 
       await axios.put(
-        `https://caviro-backend.onrender.com/api/users/reset-password/${token}`,
+        `${import.meta.env.VITE_API_URL}/api/users/reset-password/${token}`,
         { password }
       );
 

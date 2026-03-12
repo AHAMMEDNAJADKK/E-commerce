@@ -10,7 +10,7 @@ export default function AdminContactMessages() {
 
       try {
         const { data } = await axios.get(
-          "https://caviro-backend.onrender.com/api/contact",
+         "${import.meta.env.VITE_API_URL}/api/contact",
           {
             headers: {
               Authorization: `Bearer ${userInfo.token}`,

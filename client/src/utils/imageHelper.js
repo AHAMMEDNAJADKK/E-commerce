@@ -4,5 +4,5 @@ export const getImageUrl = (imagePath) => {
   // if already full url
   if (imagePath.startsWith("http")) return imagePath;
 
-  return `https://caviro-backend.onrender.com${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+  return `${import.meta.env.VITE_API_URL}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 };
