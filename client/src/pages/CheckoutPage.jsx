@@ -13,15 +13,32 @@ const CheckoutPage = () => {
 
   const placeOrderHandler = async () => {
     try {
+
+      if (!userInfo) {
+        alert("Please login first");
+        navigate("/login");
+        return;
+      }
+
+      if (!cartItems || cartItems.length === 0) {
+        alert("Cart is empty");
+        return;
+      }
+
+      const totalPrice = cartItems.reduce(
+        (acc, item) => acc + item.price * item.qty,
+        0
+      );
+
       const orderData = {
         orderItems: cartItems,
         shippingAddress,
-        totalPrice: cartItems.reduce(
-          (acc, item) => acc + item.price * item.qty,
-          0
-        ),
+        totalPrice,
       };
 
+      console.log("Creating order:", orderData);
+
+      // STEP 1 → Save order in MongoDB
       const { data: order } = await axios.post(
         `${API_URL}/api/orders`,
         orderData,
@@ -32,6 +49,9 @@ const CheckoutPage = () => {
         }
       );
 
+      console.log("Order saved:", order);
+
+      // STEP 2 → Create Razorpay order
       const { data: razorpayData } = await axios.post(
         `${API_URL}/api/payment/create-order`,
         { orderId: order._id },
@@ -42,6 +62,8 @@ const CheckoutPage = () => {
         }
       );
 
+      console.log("Razorpay order:", razorpayData);
+
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: razorpayData.amount,
@@ -51,21 +73,28 @@ const CheckoutPage = () => {
         order_id: razorpayData.razorpayOrderId,
 
         handler: async function (response) {
-          await axios.post(
-            `${API_URL}/api/payment/verify`,
-            {
-              ...response,
-              orderId: razorpayData.orderId,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${userInfo.token}`,
-              },
-            }
-          );
+          try {
 
-          localStorage.removeItem("cartItems");
-          navigate(`/order/${razorpayData.orderId}`);
+            await axios.post(
+              `${API_URL}/api/payment/verify`,
+              {
+                ...response,
+                orderId: razorpayData.orderId,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${userInfo.token}`,
+                },
+              }
+            );
+
+            localStorage.removeItem("cartItems");
+
+            navigate(`/order/${razorpayData.orderId}`);
+
+          } catch (error) {
+            console.error("Payment verify error:", error);
+          }
         },
 
         prefill: {
@@ -82,7 +111,14 @@ const CheckoutPage = () => {
       rzp.open();
 
     } catch (error) {
-      alert(error.response?.data?.message || error.message);
+
+      console.error("Order creation error:", error);
+
+      alert(
+        error.response?.data?.message ||
+        error.message ||
+        "Order failed"
+      );
     }
   };
 
@@ -91,12 +127,18 @@ const CheckoutPage = () => {
       <h2>Checkout</h2>
 
       <h3>Shipping Address</h3>
-      <p>
-        {shippingAddress.address}, {shippingAddress.city},{" "}
-        {shippingAddress.postalCode}, {shippingAddress.country}
-      </p>
+
+      {shippingAddress ? (
+        <p>
+          {shippingAddress.address}, {shippingAddress.city},{" "}
+          {shippingAddress.postalCode}, {shippingAddress.country}
+        </p>
+      ) : (
+        <p>No shipping address</p>
+      )}
 
       <h3>Order Items</h3>
+
       {cartItems.map((item) => (
         <div key={item._id}>
           {item.name} x {item.qty} = ₹{item.price * item.qty}
