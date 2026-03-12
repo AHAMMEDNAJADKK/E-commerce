@@ -4,14 +4,13 @@ import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // ✅ Added loading state
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  /* =========================
-     🔄 Load user from localStorage
-  ========================== */
   useEffect(() => {
     const storedUser = localStorage.getItem("userInfo");
 
@@ -19,16 +18,13 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(storedUser));
     }
 
-    setLoading(false); // ✅ Stop loading after checking localStorage
+    setLoading(false);
   }, []);
 
-  /* =========================
-     🔐 LOGIN
-  ========================== */
   const login = async (formData) => {
     try {
       const { data } = await axios.post(
-        "${import.meta.env.VITE_API_URL}/api/auth/login",
+        `${API_URL}/api/auth/login`,
         formData
       );
 
@@ -42,13 +38,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /* =========================
-     📝 REGISTER
-  ========================== */
   const register = async (formData) => {
     try {
       const { data } = await axios.post(
-        "${import.meta.env.VITE_API_URL}/api/auth/register",
+        `${API_URL}/api/auth/register`,
         formData
       );
 
@@ -62,9 +55,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /* =========================
-     🚪 LOGOUT
-  ========================== */
   const logout = () => {
     localStorage.removeItem("userInfo");
     setUser(null);
@@ -73,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, loading }} // ✅ loading added here
+      value={{ user, login, register, logout, loading }}
     >
       {children}
     </AuthContext.Provider>
