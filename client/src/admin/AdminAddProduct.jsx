@@ -52,7 +52,7 @@ export default function AdminAddProduct() {
 
     try {
       await axios.post(
-        "${import.meta.env.VITE_API_URL}/api/products",
+        `${import.meta.env.VITE_API_URL}/api/products`,
         formData,
         {
           headers: {

@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
 
@@ -11,37 +13,37 @@ const CheckoutPage = () => {
 
   const placeOrderHandler = async () => {
     try {
-      // 🔹 Prepare order data
       const orderData = {
         orderItems: cartItems,
         shippingAddress,
         totalPrice: cartItems.reduce(
           (acc, item) => acc + item.price * item.qty,
-          0,
+          0
         ),
       };
 
-      // ✅ STEP 1 — Create MongoDB Order
-      const { data: order } = await axios.post("/api/orders", orderData, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const { data: order } = await axios.post(
+        `${API_URL}/api/orders`,
+        orderData,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
 
-      // ✅ STEP 2 — Create Razorpay Order
       const { data: razorpayData } = await axios.post(
-        "/api/payment/create-order",
+        `${API_URL}/api/payment/create-order`,
         { orderId: order._id },
         {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
           },
-        },
+        }
       );
 
-      // ✅ STEP 3 — Open Razorpay Checkout
       const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: razorpayData.amount,
         currency: razorpayData.currency,
         name: "Caviro Sneakers",
@@ -50,7 +52,7 @@ const CheckoutPage = () => {
 
         handler: async function (response) {
           await axios.post(
-            "/api/payment/verify",
+            `${API_URL}/api/payment/verify`,
             {
               ...response,
               orderId: razorpayData.orderId,
@@ -59,7 +61,7 @@ const CheckoutPage = () => {
               headers: {
                 Authorization: `Bearer ${userInfo.token}`,
               },
-            },
+            }
           );
 
           localStorage.removeItem("cartItems");
@@ -78,6 +80,7 @@ const CheckoutPage = () => {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
+
     } catch (error) {
       alert(error.response?.data?.message || error.message);
     }

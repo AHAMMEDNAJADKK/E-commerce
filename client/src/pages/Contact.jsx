@@ -26,7 +26,9 @@ export default function Contact() {
     setError("");
 
     try {
-      await axios.post("/api/contact", formData);
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      await axios.post(`${API_URL}/api/contact`, formData);
 
       setSuccess("Message sent successfully! 🎉");
       setFormData({
@@ -37,7 +39,7 @@ export default function Contact() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -65,8 +67,8 @@ export default function Contact() {
               Get in Touch
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              Have a question about our sneakers, shipping, or payments?
-              Our support team is ready to assist you.
+              Have a question about our sneakers, shipping, or payments? Our
+              support team is ready to assist you.
             </p>
           </div>
 
@@ -75,7 +77,8 @@ export default function Contact() {
               📞 <span className="font-semibold">Phone:</span> +91 9539691757
             </p>
             <p className="text-gray-700">
-              📧 <span className="font-semibold">Email:</span> support@wearcaviro.com
+              📧 <span className="font-semibold">Email:</span>{" "}
+              support@wearcaviro.com
             </p>
             <p className="text-gray-700">
               🚚 <span className="font-semibold">Shipping:</span> All over India
@@ -132,16 +135,12 @@ export default function Contact() {
 
             {/* SUCCESS MESSAGE */}
             {success && (
-              <p className="text-green-600 text-sm font-medium">
-                {success}
-              </p>
+              <p className="text-green-600 text-sm font-medium">{success}</p>
             )}
 
             {/* ERROR MESSAGE */}
             {error && (
-              <p className="text-red-600 text-sm font-medium">
-                {error}
-              </p>
+              <p className="text-red-600 text-sm font-medium">{error}</p>
             )}
 
             <button

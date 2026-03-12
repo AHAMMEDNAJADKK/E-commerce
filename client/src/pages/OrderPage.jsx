@@ -3,6 +3,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function OrderPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -11,14 +13,19 @@ export default function OrderPage() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const { data } = await axios.get(`/api/orders/${id}`, {
+        const { data } = await axios.get(`${API_URL}/api/orders/${id}`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
         });
+
         setOrder(data);
+
       } catch (error) {
-        console.error("ORDER FETCH ERROR:", error.response?.data || error.message);
+        console.error(
+          "ORDER FETCH ERROR:",
+          error.response?.data || error.message
+        );
       }
     };
 
@@ -30,8 +37,11 @@ export default function OrderPage() {
   return (
     <div style={{ padding: "40px" }}>
       <h2>Order Details</h2>
+
       <p>Order ID: {order._id}</p>
+
       <p>Total: ₹{order.totalPrice}</p>
+
       <p>Status: {order.isPaid ? "Paid ✅" : "Not Paid ❌"}</p>
     </div>
   );

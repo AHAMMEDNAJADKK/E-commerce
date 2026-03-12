@@ -10,7 +10,7 @@ export default function AdminOrders() {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
       const { data } = await axios.get(
-        "${import.meta.env.VITE_API_URL}/api/orders",
+        `${import.meta.env.VITE_API_URL}/api/orders`,
         {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
