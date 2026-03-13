@@ -6,10 +6,16 @@ import { Parser } from "json2csv";
 ===================================================== */
 export const createOrder = async (req, res) => {
   try {
+    console.log("ORDER REQUEST BODY:", req.body);
+
     const { orderItems, shippingAddress, totalPrice } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
-      return res.status(400).json({ message: "No order items" });
+      return res.status(400).json({ message: "No order items provided" });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authorized" });
     }
 
     const order = new Order({
@@ -20,8 +26,13 @@ export const createOrder = async (req, res) => {
     });
 
     const createdOrder = await order.save();
+
+    console.log("ORDER SAVED:", createdOrder._id);
+
     res.status(201).json(createdOrder);
+
   } catch (error) {
+    console.error("ORDER SAVE ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
