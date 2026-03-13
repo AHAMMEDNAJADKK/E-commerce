@@ -1,11 +1,40 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { getImageUrl } from "../utils/imageHelper";
 
 export default function Orders() {
-  const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  const [orders, setOrders] = useState([]);
+
+  const fetchOrders = async () => {
+    try {
+
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+      if (!userInfo) return;
+
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/orders/myorders`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+
+      setOrders(data);
+
+    } catch (error) {
+      console.error("Failed to fetch orders", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const clearOrders = () => {
-    localStorage.removeItem("orders");
-    window.location.reload();
+    setOrders([]);
   };
 
   return (
@@ -28,8 +57,8 @@ export default function Orders() {
       ) : (
         <div className="space-y-8">
           {orders.map((order, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl shadow-md">
-              
+            <div key={order._id} className="bg-white p-6 rounded-xl shadow-md">
+
               {/* Order Header */}
               <div className="flex justify-between mb-6 flex-wrap gap-2">
                 <h3 className="font-semibold text-lg">
@@ -38,22 +67,22 @@ export default function Orders() {
 
                 <div className="text-right">
                   <p className="font-semibold text-caviro">
-                    ₹{order.amount}
+                    ₹{order.totalPrice}
                   </p>
                   <p className="text-sm text-gray-500">
-                    Status: {order.status}
+                    Status: {order.isPaid ? "Paid" : "Pending"}
                   </p>
                 </div>
               </div>
 
               {/* Products */}
               <div className="space-y-5">
-                {order.items?.map((item, index) => (
+                {order.orderItems?.map((item, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-4 border-b pb-4"
                   >
-                    {/* 🔥 FIXED IMAGE BOX */}
+
                     <div className="w-24 h-24 flex-shrink-0 border rounded-lg overflow-hidden bg-gray-100">
                       <img
                         src={getImageUrl(item.image)}
@@ -62,28 +91,20 @@ export default function Orders() {
                       />
                     </div>
 
-                    {/* Details */}
                     <div className="flex-1">
                       <h4 className="font-semibold">
                         {item.name}
                       </h4>
 
                       <p className="text-sm text-gray-500">
-                        Brand: {item.brand}
-                      </p>
-
-                      <p className="text-sm text-gray-500">
-                        Quality: {item.quality}
-                      </p>
-
-                      <p className="text-sm text-gray-500">
-                        Quantity: {item.quantity}
+                        Quantity: {item.qty}
                       </p>
                     </div>
 
                     <div className="font-semibold text-caviro">
                       ₹{item.price}
                     </div>
+
                   </div>
                 ))}
               </div>
