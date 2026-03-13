@@ -20,7 +20,7 @@ export default function AdminProducts() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const userInfo = JSON.parse(localStorage.getItem("userInfo")) || {};
 
   const config = {
     headers: {
@@ -39,7 +39,7 @@ export default function AdminProducts() {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
           },
-        }
+        },
       );
 
       setProducts(data.products);
@@ -76,7 +76,7 @@ export default function AdminProducts() {
       await axios.put(
         `${import.meta.env.VITE_API_URL}/api/products/${editingProduct._id}`,
         formData,
-        config
+        config,
       );
 
       toast.success("Product updated successfully");
@@ -108,7 +108,7 @@ export default function AdminProducts() {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
           },
-        }
+        },
       );
 
       toast.success("Product deleted successfully");
@@ -262,10 +262,7 @@ export default function AdminProducts() {
 
             <p className="mb-6 text-gray-600">
               Are you sure you want to delete{" "}
-              <span className="font-semibold">
-                {productToDelete?.name}
-              </span>
-              ?
+              <span className="font-semibold">{productToDelete?.name}</span>?
             </p>
 
             <div className="flex gap-4">

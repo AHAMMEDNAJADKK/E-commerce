@@ -37,7 +37,7 @@ export default function AdminDashboard() {
           },
         });
 
-        setOrders(data);
+        setOrders(Array.isArray(data) ? data : data.orders || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
 
   const now = new Date();
 
-  const filteredOrders = orders.filter((o) => {
+  const filteredOrders = (Array.isArray(orders) ? orders : []).filter((o) => {
     const orderDate = new Date(o.createdAt);
     const diff = (now - orderDate) / (1000 * 60 * 60 * 24);
     return diff <= range;

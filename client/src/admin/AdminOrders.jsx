@@ -18,7 +18,7 @@ export default function AdminOrders() {
         }
       );
 
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : data.orders || []);
     } catch (error) {
       toast.error("Failed to fetch orders");
     }
@@ -102,7 +102,7 @@ Thank you for shopping with us ❤️
           </thead>
 
           <tbody>
-            {orders.map((order) => (
+            {Array.isArray(orders) && orders.map((order) => (
               <tr key={order._id} className="border-b hover:bg-gray-50">
                 <td className="p-4">{order.user?.email}</td>
 
